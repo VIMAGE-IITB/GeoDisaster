@@ -1,0 +1,190 @@
+{
+  "id": "deforestation/000086/multi_year_loss_attribution",
+  "sample_id": "000086",
+  "question_type": "multi_year_loss_attribution",
+  "question": {
+    "handle": "question_1",
+    "text": "Using only Hansen lossyear codes 1 through 23 (calendar years 2001 through 2023) inside this AOI, compute each year's grid-aware loss area in hectares and return the year with the largest area plus that six-decimal area. Break an equal six-decimal area tie in favor of the earliest year. If no valid pixel has a code from 1 through 23, return year 'no_loss' and loss_ha 0.0. Code 0 is valid no-loss and nodata 255 is excluded.",
+    "question_path": {
+      "path": "source_assets/deforestation/000086/questions/multi_year_loss_attribution.json",
+      "label": "multi_year_loss_attribution.json",
+      "exists": true,
+      "optional": false
+    },
+    "answer_schema": {
+      "type": "object",
+      "properties": {
+        "loss_ha": {
+          "type": "number",
+          "minimum": 0
+        },
+        "year": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 2001,
+              "maximum": 2023
+            },
+            {
+              "const": "no_loss"
+            }
+          ]
+        }
+      },
+      "required": [
+        "loss_ha",
+        "year"
+      ],
+      "additionalProperties": false,
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "urn:geodisaster:answer:deforestation:multi_year_loss_attribution:v1",
+      "title": "GeoDisaster answer: deforestation/multi_year_loss_attribution",
+      "x-contract-version": "geodisaster_answer_schema_v1"
+    },
+    "hansen_raster_contract": {
+      "version": "hansen_valid_zero_finite_nodata_v1",
+      "treecover_valid_range_pct": [
+        0,
+        100
+      ],
+      "lossyear_valid_codes": "0=no_loss; 1..25=2001..2025",
+      "benchmark_analysis_codes": "1..23=2001..2023",
+      "nodata": 255,
+      "valid_zero": true
+    },
+    "multi_year_area_contract": {
+      "version": "hansen_grid_area_by_year_v1",
+      "rule": "sum grid-aware cell areas independently for each Hansen year code 1..23",
+      "geographic_area": "WGS84 ellipsoidal cell area",
+      "projected_area": "affine-determinant cell area",
+      "rounding": "six decimals in hectares",
+      "tie_break_rule": "earliest year among equal six-decimal areas",
+      "no_loss_rule": "return year=no_loss and loss_ha=0.0 when codes 1..23 are absent"
+    }
+  },
+  "initial_artifacts": {
+    "question_1": {
+      "handle": "question_1",
+      "type": "question",
+      "description": "Current natural-language question and schema handle."
+    },
+    "forest_loss_history_1": {
+      "handle": "forest_loss_history_1",
+      "type": "forest_loss_history",
+      "role": "hansen",
+      "description": "Full Hansen lossyear raster for 2001-2023 attribution.",
+      "paths": {
+        "masks": [
+          {
+            "path": "source_assets/deforestation/000086/masks/lossyear.tif",
+            "label": "lossyear.tif",
+            "exists": true,
+            "optional": false
+          }
+        ]
+      },
+      "metadata": {
+        "time": "2001_2023"
+      }
+    }
+  },
+  "available_initial_handles": [
+    "forest_loss_history_1",
+    "question_1"
+  ],
+  "gt_chain": [
+    {
+      "tool": "ReadData",
+      "args": {
+        "question": "question_1",
+        "input": "forest_loss_history_1",
+        "role": "hansen",
+        "time": "2001_2023"
+      }
+    },
+    {
+      "tool": "PrepareScene",
+      "args": {
+        "question": "question_1",
+        "inputs": {
+          "loss_history": "scene_1"
+        },
+        "mode": "forest_loss_history"
+      }
+    },
+    {
+      "tool": "ComputeStats",
+      "args": {
+        "question": "question_1",
+        "work": "work_1",
+        "metrics": {
+          "loss_area_ha_by_year": true
+        },
+        "region": "aoi"
+      }
+    },
+    {
+      "tool": "DetectChange",
+      "args": {
+        "question": "question_1",
+        "work": "stats_1",
+        "change": "largest_loss_year",
+        "window": "2001_2023"
+      }
+    },
+    {
+      "tool": "TaskComplete",
+      "args": {
+        "status": "TASK_COMPLETE",
+        "summary": "Return the six-decimal largest-loss area and its earliest equal-area year, or no_loss."
+      }
+    }
+  ],
+  "expected_final_answer": {
+    "year": 2016,
+    "loss_ha": 201.039833
+  },
+  "source_replay": {
+    "mode": "executed_current_workers",
+    "status": "passed_publication_contract",
+    "matches_expected": true,
+    "raw_tools_executed_for_verification": true,
+    "contract_version": "geodisaster_publication_contract_v1_20261014",
+    "evidence": "experimental/correction_runs/49_publication_final/full_2921"
+  },
+  "path_summary": {
+    "path_count": 2,
+    "required_missing_count": 0,
+    "required_missing": []
+  },
+  "split_seed": "geodisaster_source_path_trajectory_grouped_split_v4_20261015",
+  "split": "train",
+  "split_group_id": "deforestation:dcc44acc1e653f33",
+  "correction_provenance": {
+    "c10_raster_portability": {
+      "version": "finite_nodata_geotiff_v1",
+      "annual_mask_encoding_changed_only": true,
+      "tool_names_or_arguments_changed": false,
+      "expected_answer_changed": false
+    },
+    "deforestation_contract_completion": {
+      "version": "deforestation_contract_completion_v1_20261014",
+      "hansen_contract": "hansen_valid_zero_finite_nodata_v1",
+      "sar_temporal_contract": "declared_s1_acquisition_windows_v1",
+      "question_type_contract": "hansen_grid_area_by_year_v1",
+      "changed_expected_top_level_paths": [
+        "loss_ha"
+      ],
+      "tool_names_or_signatures_changed": false
+    },
+    "publication_contract": {
+      "version": "geodisaster_publication_contract_v1_20261014",
+      "causal_gt_chain": true,
+      "unused_initial_handles_removed": true,
+      "structured_scoring_policy": "geodisaster_structured_answer_v1"
+    }
+  },
+  "training_weight": 1.0,
+  "training_weight_contract": "inverse_complete_trajectory_multiplicity_v1",
+  "trajectory_content_group_id": "trajectory:2aba4d186ac5b4f6"
+}

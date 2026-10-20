@@ -1,0 +1,31 @@
+accelerate>=0.34
+datasets>=2.19
+fastapi>=0.110
+langgraph>=0.2
+# Worker answers were published and replay-verified with this deterministic
+# scientific stack. NumPy 2 changes float32 histogram edges for two Sentinel-1
+# chips, so these versions are part of the executable answer contract.
+numpy==1.26.4
+openai>=1.30
+pandas>=2.0
+peft>=0.12
+pillow==11.3.0
+protobuf>=4.25
+python-box>=7.0
+jsonschema>=4.21
+# Geospatial / scientific stack used by the tool workers.
+rasterio==1.4.3
+pyproj==3.7.1
+scipy==1.11.4
+shapely==2.1.2
+matplotlib>=3.7
+pydantic>=2.7
+PyYAML>=6.0
+requests>=2.31
+safetensors>=0.4
+sentencepiece>=0.2
+torch>=2.2
+tqdm>=4.66
+transformers>=4.44
+trl>=0.9
+uvicorn>=0.29

@@ -1,0 +1,52 @@
+cff-version: 1.2.0
+message: "If you use GeoDisaster (code or dataset), please cite this work."
+title: "GeoDisaster: Benchmarking Orchestrated Agents for Operational Disaster Geo-Intelligence"
+authors:
+  - given-names: Maram
+    family-names: Hasan
+  - given-names: Aman
+    family-names: Verma
+  - given-names: Savitra
+    family-names: Roy
+  - given-names: Hariseetharam
+    family-names: Gunduboina
+  - given-names: Daksh
+    family-names: Jain
+  - given-names: Muhammad Haris
+    family-names: Khan
+  - given-names: Subhasis
+    family-names: Chaudhuri
+  - given-names: Biplab
+    family-names: Banerjee
+year: 2026
+license: Apache-2.0
+url: "https://huggingface.co/datasets/vimageiitb/geodisaster-agentic-2921"
+keywords:
+  - geospatial
+  - remote-sensing
+  - disaster-response
+  - earth-observation
+  - multi-agent
+  - tool-use
+  - agentic-reasoning
+preferred-citation:
+  type: article
+  title: "GeoDisaster: Benchmarking Orchestrated Agents for Operational Disaster Geo-Intelligence"
+  authors:
+    - given-names: Maram
+      family-names: Hasan
+    - given-names: Aman
+      family-names: Verma
+    - given-names: Savitra
+      family-names: Roy
+    - given-names: Hariseetharam
+      family-names: Gunduboina
+    - given-names: Daksh
+      family-names: Jain
+    - given-names: Muhammad Haris
+      family-names: Khan
+    - given-names: Subhasis
+      family-names: Chaudhuri
+    - given-names: Biplab
+      family-names: Banerjee
+  year: 2026

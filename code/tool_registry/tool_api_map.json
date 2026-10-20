@@ -1,0 +1,940 @@
+{
+  "schema_version": "final_dataset_tool_api_map_v2",
+  "controller": {
+    "default_port": 20101,
+    "list_models": "http://localhost:20101/list_models"
+  },
+  "worker_base_dir": "tool_server/tool_workers/online_workers",
+  "tools": [
+    {
+      "tool": "ReadData",
+      "worker_file": "ReadData_worker.py",
+      "default_port": 20102,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "ReadData",
+          "description": "Open a named input handle for the current question, validate its local artifact paths, and return a scene handle containing the discovered raster/vector/image/report refs. The evaluator must initialize the session first with code/scripts/initialize_tool_session.py; case contents are not agent-visible tool arguments.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id injected by the caller; keeps handles shared across tools."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle, usually question_1."
+              },
+              "input": {
+                "type": "string",
+                "description": "Canonical input handle to open, such as hazard_stack_1 or sar_chip_1."
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "pre_post",
+                  "hansen",
+                  "ndvi_nbr",
+                  "vh",
+                  "wildfire",
+                  "deforestation",
+                  "urban_expansion",
+                  "drought",
+                  "air_pollution",
+                  "hospitals_and_schools",
+                  "highways",
+                  "nearest_highway",
+                  "population_in_footprint",
+                  "schools",
+                  "population",
+                  "post_disaster",
+                  "buildings",
+                  "target_classes",
+                  "scene_a",
+                  "scene_b",
+                  "roads_shelters_flood",
+                  "roads_shelters_flood_rgb",
+                  "primary",
+                  "known_water_reference"
+                ],
+                "description": "Optional call role; a specific artifact-card role is authoritative."
+              },
+              "time": {
+                "type": "string",
+                "enum": [
+                  "event",
+                  "event_window",
+                  "pre_post_epochs",
+                  "2001_2023"
+                ],
+                "description": "Optional temporal selector; a specific artifact-card time is authoritative."
+              },
+              "options": {
+                "type": "object",
+                "description": "Optional data-selection hints such as source groups or bands.",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "question",
+              "input"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "PrepareScene",
+      "worker_file": "PrepareScene_worker.py",
+      "default_port": 20103,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "PrepareScene",
+          "description": "Build an aligned work context from one or more opened scene handles. It checks handle types and records the processing mode before downstream analytics.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle."
+              },
+              "inputs": {
+                "type": "object",
+                "description": "Mapping from semantic slot names to scene handles, for example {'hazard':'scene_1'}.",
+                "additionalProperties": true
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "forest",
+                  "hazard",
+                  "xbd_damage",
+                  "sar_flood",
+                  "routing",
+                  "scene_compare",
+                  "forest_change",
+                  "forest_timeseries",
+                  "forest_false_positive",
+                  "baseline_canopy",
+                  "forest_loss_history",
+                  "forest_cross_modal",
+                  "sar_change",
+                  "wildfire_burn",
+                  "forest_loss",
+                  "built_up_gain",
+                  "drought_anomaly",
+                  "pollution_peak",
+                  "multisource_hazard",
+                  "wildfire_burn_exposure",
+                  "forest_loss_exposure",
+                  "built_up_gain_exposure",
+                  "drought_anomaly_exposure",
+                  "pollution_peak_exposure",
+                  "xbd_grid",
+                  "xbd_quadrants",
+                  "xbd_scene_summary",
+                  "flood_safe_routing",
+                  "sar_flood_reference",
+                  "sar_flood_diagnostic"
+                ],
+                "description": "Supported preparation mode; task-specific names normalize to a guarded broad mode."
+              },
+              "checks": {
+                "type": "object",
+                "description": "Optional required checks, such as grid size or spatial alignment requirements.",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "question",
+              "inputs",
+              "mode"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "ComputeStats",
+      "worker_file": "ComputeStats_worker.py",
+      "default_port": 20104,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "ComputeStats",
+          "description": "Compute numeric statistics for a work/damage/hazard handle, including area, counts, means, z-scores, class histograms, or footprint summaries.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle."
+              },
+              "work": {
+                "type": "string",
+                "description": "Input work or analytic handle."
+              },
+              "metrics": {
+                "type": "object",
+                "description": "Broad metric family requested by the question. Prefer canopy_cover, forest_loss_history, sar_change, hazard_area, vegetation_anomaly, pollution_peak, or damage_summary.",
+                "additionalProperties": true
+              },
+              "region": {
+                "type": "string",
+                "enum": [
+                  "aoi",
+                  "scene"
+                ],
+                "description": "Supported aggregation region."
+              }
+            },
+            "required": [
+              "question",
+              "work",
+              "metrics"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "MeasureArea",
+      "worker_file": "MeasureArea_worker.py",
+      "default_port": 20105,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "MeasureArea",
+          "description": "Measure area for extracted objects or masks in the requested units by reading the underlying raster/vector data referenced by the input handle.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle."
+              },
+              "work": {
+                "type": "string",
+                "description": "Input object/mask/work handle."
+              },
+              "target": {
+                "type": "string",
+                "enum": [
+                  "forest_loss"
+                ],
+                "description": "Target class to measure."
+              },
+              "unit": {
+                "type": "string",
+                "enum": [
+                  "hectares"
+                ],
+                "description": "Output unit."
+              }
+            },
+            "required": [
+              "question",
+              "work",
+              "target",
+              "unit"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "CompareSources",
+      "worker_file": "CompareSources_worker.py",
+      "default_port": 20106,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "CompareSources",
+          "description": "Compare multiple modalities or source layers, such as optical-vs-SAR, multi-source hazard agreement, or predicted-flood overlap versus pixels outside a known-water reference. Known-water context does not by itself establish temporal novelty.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle."
+              },
+              "work": {
+                "type": "string",
+                "description": "Input work or analytic handle."
+              },
+              "compare": {
+                "type": "object",
+                "description": "Comparison specification: signals/sources/reference plus criterion.",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "question",
+              "work",
+              "compare"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "DetectChange",
+      "worker_file": "DetectChange_worker.py",
+      "default_port": 20107,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "DetectChange",
+          "description": "Detect or localize temporal change windows or dominant change events from a work handle.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle."
+              },
+              "work": {
+                "type": "string",
+                "description": "Input work/statistics handle."
+              },
+              "change": {
+                "type": "string",
+                "enum": [
+                  "largest_loss_year",
+                  "dominant_clearing_interval"
+                ],
+                "description": "Change concept to detect."
+              },
+              "window": {
+                "type": "string",
+                "enum": [
+                  "2001_2023",
+                  "pre_post_epochs"
+                ],
+                "description": "Temporal window to inspect."
+              }
+            },
+            "required": [
+              "question",
+              "work",
+              "change"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "ClassifyChange",
+      "worker_file": "ClassifyChange_worker.py",
+      "default_port": 20108,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "ClassifyChange",
+          "description": "Classify a change, canopy state, concordance state, or false-positive category using explicit labels/rules.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle."
+              },
+              "work": {
+                "type": "string",
+                "description": "Input work/change/statistics handle."
+              },
+              "labels": {
+                "type": "object",
+                "description": "Allowed labels or thresholds.",
+                "additionalProperties": true
+              },
+              "rule": {
+                "type": "string",
+                "enum": [
+                  "forest_loss",
+                  "change_window",
+                  "false_positive_type",
+                  "canopy_density",
+                  "concordance",
+                  "cross_modal_concordance"
+                ],
+                "description": "Supported deforestation classification rule."
+              }
+            },
+            "required": [
+              "question",
+              "work",
+              "labels",
+              "rule"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "ScoreHazard",
+      "worker_file": "ScoreHazard_worker.py",
+      "default_port": 20109,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "ScoreHazard",
+          "description": "Score hazard class, severity, concentration, or impact footprint from a prepared/analytic handle.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle."
+              },
+              "work": {
+                "type": "string",
+                "description": "Input work/statistics/damage handle."
+              },
+              "hazard": {
+                "type": "string",
+                "enum": [
+                  "forest_disturbance",
+                  "wildfire",
+                  "deforestation",
+                  "urban_expansion",
+                  "drought",
+                  "air_pollution",
+                  "building_damage"
+                ],
+                "description": "Hazard family to score."
+              },
+              "scale": {
+                "type": "string",
+                "enum": [
+                  "vh_delta_severity",
+                  "question_defined_class",
+                  "benchmark_relative_column_quartile",
+                  "impact_footprint",
+                  "spatial_concentration"
+                ],
+                "description": "Supported scoring scale."
+              }
+            },
+            "required": [
+              "question",
+              "work",
+              "hazard",
+              "scale"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "EstimateExposure",
+      "worker_file": "EstimateExposure_worker.py",
+      "default_port": 20110,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "EstimateExposure",
+          "description": "Estimate exposure of people/assets/roads/facilities to a hazard footprint or blocked-road layer.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle."
+              },
+              "work": {
+                "type": "string",
+                "description": "Input work handle."
+              },
+              "exposure": {
+                "type": "string",
+                "enum": [
+                  "blocked_roads",
+                  "high_no2_column_population",
+                  "highway_representatives_within_5km",
+                  "nearest_highway",
+                  "population_in_footprint",
+                  "schools"
+                ],
+                "description": "Supported exposure target."
+              },
+              "metrics": {
+                "type": "object",
+                "description": "Requested exposure metrics.",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "question",
+              "work",
+              "exposure",
+              "metrics"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "AssessDamage",
+      "worker_file": "AssessDamage_worker.py",
+      "default_port": 20111,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "AssessDamage",
+          "description": "Aggregate building-damage polygons into scene, grid, quadrant, severe-only, or pair-comparison summaries.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle."
+              },
+              "work": {
+                "type": "string",
+                "description": "Input work/object handle."
+              },
+              "aggregation": {
+                "type": "string",
+                "enum": [
+                  "scene",
+                  "grid_4x4",
+                  "quadrant_2x2",
+                  "severe_only",
+                  "pair_compare"
+                ],
+                "description": "Supported damage aggregation mode."
+              },
+              "severity": {
+                "type": "string",
+                "enum": [
+                  "severe",
+                  "major_or_destroyed"
+                ],
+                "description": "Optional severity filter, when required by the aggregation."
+              }
+            },
+            "required": [
+              "question",
+              "work",
+              "aggregation"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "RankRegions",
+      "worker_file": "RankRegions_worker.py",
+      "default_port": 20112,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "RankRegions",
+          "description": "Rank regions, components, grid cells, quadrants, or route candidates by the requested score.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle."
+              },
+              "work": {
+                "type": "string",
+                "description": "Input analytic handle."
+              },
+              "by": {
+                "type": "string",
+                "enum": [
+                  "severe_footprint_area_m2",
+                  "severe_area_m2",
+                  "severe_damage_count",
+                  "severe_count",
+                  "normalized_damage_severity",
+                  "normalized_severity",
+                  "severity_score",
+                  "severity_score_normalized",
+                  "flood_percentage",
+                  "flood_pixels",
+                  "flood_area"
+                ],
+                "description": "Supported ranking metric."
+              },
+              "candidates": {
+                "type": "string",
+                "enum": [
+                  "grid_4x4",
+                  "quadrants_2x2"
+                ],
+                "description": "Supported candidate set."
+              },
+              "top_k": {
+                "type": "integer",
+                "description": "Number of ranked entries to return."
+              }
+            },
+            "required": [
+              "question",
+              "work",
+              "by",
+              "candidates"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "CompareScenes",
+      "worker_file": "CompareScenes_worker.py",
+      "default_port": 20113,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "CompareScenes",
+          "description": "Compare two prepared scene summaries and decide which scene has the larger damage/risk signal.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle."
+              },
+              "work": {
+                "type": "string",
+                "description": "Pair-comparison damage/work handle."
+              },
+              "by": {
+                "type": "string",
+                "enum": [
+                  "severe_damage_ratio_and_footprint"
+                ],
+                "description": "Comparison criterion."
+              }
+            },
+            "required": [
+              "question",
+              "work",
+              "by"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "ExtractObjects",
+      "worker_file": "ExtractObjects_worker.py",
+      "default_port": 20114,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "ExtractObjects",
+          "description": "Extract object sets such as forest-loss patches, severe buildings, flood polygons, or flood components. Sentinel flood polygons and components use 8-neighbour connectivity and produce validated run-scoped GeoJSON or label-raster artifacts.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle."
+              },
+              "work": {
+                "type": "string",
+                "description": "Input work/flood handle."
+              },
+              "target": {
+                "type": "string",
+                "enum": [
+                  "forest_loss_patches",
+                  "severe_buildings",
+                  "flood_polygons",
+                  "flood_components"
+                ],
+                "description": "Object target to extract."
+              },
+              "filters": {
+                "type": "object",
+                "description": "Optional class/year/severity filters.",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "question",
+              "work",
+              "target"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "MapFlood",
+      "worker_file": "MapFlood_worker.py",
+      "default_port": 20115,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "MapFlood",
+          "description": "Produce a run-scoped 0/1/255 candidate-flood mask from a prepared SAR scene. The published Sentinel contract supports the validated s1_min_backscatter_otsu_v1 method.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle."
+              },
+              "work": {
+                "type": "string",
+                "description": "Prepared SAR flood work handle."
+              },
+              "method": {
+                "type": "string",
+                "enum": [
+                  "s1_min_backscatter_otsu_v1"
+                ],
+                "description": "Validated flood mapping method."
+              }
+            },
+            "required": [
+              "question",
+              "work",
+              "method"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "DescribeFlood",
+      "worker_file": "DescribeFlood_worker.py",
+      "default_port": 20116,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "DescribeFlood",
+          "description": "Select and summarize requested flood-mask/component/polygon metrics, including exact-grid areas, centroids, 4x4 grids, and known-water overlap statistics from the causal handle.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle."
+              },
+              "work": {
+                "type": "string",
+                "description": "Flood/object handle."
+              },
+              "metrics": {
+                "type": "object",
+                "description": "Requested flood metrics.",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "question",
+              "work",
+              "metrics"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "PlanRoutes",
+      "worker_file": "PlanRoutes_worker.py",
+      "default_port": 20117,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "PlanRoutes",
+          "description": "Recompute route metrics and composite edge costs from declared packaged geometry/road products, then select eligible fastest, safest-weighted, and balanced candidates; this worker does not run a new graph search.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle."
+              },
+              "work": {
+                "type": "string",
+                "description": "Prepared routing work handle."
+              },
+              "objective": {
+                "type": "string",
+                "enum": [
+                  "nearest_reachable_shelter",
+                  "candidate_routes",
+                  "overlay_routes"
+                ],
+                "description": "Supported packaged route objective."
+              },
+              "avoid": {
+                "type": "object",
+                "description": "Required packaged eligibility assertion: flood_affected_roads must be true.",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "question",
+              "work",
+              "objective",
+              "avoid"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "CompareRoutes",
+      "worker_file": "CompareRoutes_worker.py",
+      "default_port": 20118,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "CompareRoutes",
+          "description": "Compare requested validated fastest, safest-weighted, and balanced candidates and compute the full trade-off when all three are requested, without adding an evacuation recommendation.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle."
+              },
+              "work": {
+                "type": "string",
+                "description": "Routes handle."
+              },
+              "prefer": {
+                "type": "object",
+                "description": "Boolean fastest/safest/balanced groups to include; at least one must be true.",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "question",
+              "work",
+              "prefer"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "tool": "RenderMap",
+      "worker_file": "RenderMap_worker.py",
+      "default_port": 20119,
+      "instruction": {
+        "type": "function",
+        "function": {
+          "name": "RenderMap",
+          "description": "Render a fresh run-scoped map/image artifact and validation manifest from the current analytical handle and exactly the requested declared layers; prepared answer overlays and unrequested context layers are not retrieved.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "description": "Episode/session id."
+              },
+              "question": {
+                "type": "string",
+                "description": "Question handle."
+              },
+              "work": {
+                "type": "string",
+                "description": "Input map-ready handle."
+              },
+              "layers": {
+                "type": "object",
+                "description": "Layer toggles to render.",
+                "additionalProperties": true
+              },
+              "style": {
+                "type": "string",
+                "enum": [
+                  "route_overlay",
+                  "flood_diagnostic"
+                ],
+                "description": "Supported rendering style."
+              }
+            },
+            "required": [
+              "question",
+              "work",
+              "layers",
+              "style"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "notes": [
+    "Worker instructions include transport-injected session_id; agents never generate it.",
+    "Agent-visible signatures are derived from final_dataset_tool_specs.py.",
+    "The evaluator initializes the first ReadData call with the sanitized case and session."
+  ]
+}

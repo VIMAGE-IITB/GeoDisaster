@@ -1,0 +1,45 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+.cache/
+.runtime/
+
+# Secrets and credentials (never commit).
+.secrets/
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+*_api_key*
+controller_addr.json
+
+runs/
+outputs/
+wandb/
+logs/
+
+# Generated data and evaluation artifacts.
+*.jsonl
+final_dataset_gt_replay/**/runs/
+final_dataset_gt_replay/**/final_tool_outputs/
+final_dataset_gt_replay/**/final_tool_server_logs/
+final_dataset_gt_replay/**/tool_worker_artifacts/
+final_dataset_gt_replay/**/tool_worker_sessions/
+
+# Model weights and large archives.
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.gguf
+*.ckpt
+*.zip
+*.tar
+*.tar.gz

@@ -1,0 +1,2231 @@
+{
+  "schema_version": "geodisaster_multiagentic_sft_v3",
+  "idx": 22,
+  "dataset_id": "deforestation/000086/multi_year_loss_attribution",
+  "id": "deforestation/000086/multi_year_loss_attribution",
+  "sample_id": "000086",
+  "source": "deforestation_data",
+  "dataset": "deforestation",
+  "final_split": "train",
+  "question_type": "multi_year_loss_attribution",
+  "raw_question": "Using only Hansen lossyear codes 1 through 23 (calendar years 2001 through 2023) inside this AOI, compute each year's grid-aware loss area in hectares and return the year with the largest area plus that six-decimal area. Break an equal six-decimal area tie in favor of the earliest year. If no valid pixel has a code from 1 through 23, return year 'no_loss' and loss_ha 0.0. Code 0 is valid no-loss and nodata 255 is excluded.",
+  "question": "Using only Hansen lossyear codes 1 through 23 (calendar years 2001 through 2023) inside this AOI, compute each year's grid-aware loss area in hectares and return the year with the largest area plus that six-decimal area. Break an equal six-decimal area tie in favor of the earliest year. If no valid pixel has a code from 1 through 23, return year 'no_loss' and loss_ha 0.0. Code 0 is valid no-loss and nodata 255 is excluded.\n\nAVAILABLE INPUT HANDLES\nUse these exact handles in tool arguments. The tools resolve true local paths from the handle cards.\n- forest_loss_history_1: Full Hansen lossyear raster for 2001-2023 attribution.; refs: lossyear.tif\n- question_1: Current natural-language question and schema handle.\n\nANSWER SCHEMA\n{\"type\": \"object\", \"properties\": {\"loss_ha\": {\"type\": \"number\", \"minimum\": 0}, \"year\": {\"oneOf\": [{\"type\": \"integer\", \"minimum\": 2001, \"maximum\": 2023}, {\"const\": \"no_loss\"}]}}, \"required\": [\"loss_ha\", \"year\"], \"additionalProperties\": false, \"$schema\": \"https://json-schema.org/draft/2020-12/schema\", \"$id\": \"urn:geodisaster:answer:deforestation:multi_year_loss_attribution:v1\", \"title\": \"GeoDisaster answer: deforestation/multi_year_loss_attribution\", \"x-contract-version\": \"geodisaster_answer_schema_v1\"}",
+  "initial_artifacts": {
+    "question_1": {
+      "handle": "question_1",
+      "type": "question",
+      "description": "Current natural-language question and schema handle."
+    },
+    "forest_loss_history_1": {
+      "handle": "forest_loss_history_1",
+      "type": "forest_loss_history",
+      "role": "hansen",
+      "description": "Full Hansen lossyear raster for 2001-2023 attribution.",
+      "paths": {
+        "masks": [
+          {
+            "path": "source_assets/deforestation/000086/masks/lossyear.tif",
+            "label": "lossyear.tif",
+            "exists": true,
+            "optional": false
+          }
+        ]
+      },
+      "metadata": {
+        "time": "2001_2023"
+      }
+    }
+  },
+  "available_initial_handles": [
+    "forest_loss_history_1",
+    "question_1"
+  ],
+  "plan": {
+    "goal": "Resolve the deterministic deforestation / multi year loss attribution task using the declared handles and answer schema.",
+    "steps": [
+      {
+        "id": "s1",
+        "agent": "GA",
+        "subtask": "GA contract for deterministic deforestation / multi year loss attribution: prepare reusable evidence from forest_loss_history_1. Preserve units, temporal/source metadata, masks, and schema cues so later reasoning has a compact grounded work context.",
+        "needs": [
+          "question_1",
+          "forest_loss_history_1"
+        ]
+      },
+      {
+        "id": "s2",
+        "agent": "PA",
+        "subtask": "PA contract for deterministic deforestation / multi year loss attribution: compute the requested statistic from prepared evidence. Report the value, units, and support fields needed by ORC.",
+        "needs": [
+          "question_1",
+          "work_1"
+        ]
+      }
+    ]
+  },
+  "executions": [
+    {
+      "step_id": "s1",
+      "agent": "GA",
+      "turns": [
+        {
+          "thought": "Need a verified scene handle for `forest_loss_history_1` before any downstream evidence step.",
+          "action": {
+            "tool": "ReadData",
+            "args": {
+              "question": "question_1",
+              "input": "forest_loss_history_1",
+              "role": "hansen",
+              "time": "2001_2023"
+            }
+          },
+          "tool_output": {
+            "ok": true,
+            "text": "opened input as `scene_1`",
+            "produced": {
+              "artifacts": [],
+              "layers": [],
+              "fields": {
+                "latest_tool": "ReadData",
+                "latest_tool_ok": true,
+                "latest_summary": "opened input as `scene_1`",
+                "latest_handle": "scene_1",
+                "scene_1_summary": "opened input as `scene_1`"
+              }
+            },
+            "observation": {
+              "tool": "ReadData",
+              "status": "OK",
+              "summary": "opened input as `scene_1`",
+              "produced_handle": "scene_1"
+            }
+          }
+        },
+        {
+          "thought": "Opened scenes are ready; combine {\"loss_history\": \"scene_1\"} into a `forest_loss_history` work context with units, masks, and metadata preserved.",
+          "action": {
+            "tool": "PrepareScene",
+            "args": {
+              "question": "question_1",
+              "inputs": {
+                "loss_history": "scene_1"
+              },
+              "mode": "forest_loss_history"
+            }
+          },
+          "tool_output": {
+            "ok": true,
+            "text": "prepared reusable work context `work_1`",
+            "produced": {
+              "artifacts": [],
+              "layers": [],
+              "fields": {
+                "latest_tool": "PrepareScene",
+                "latest_tool_ok": true,
+                "latest_summary": "prepared reusable work context `work_1`",
+                "latest_handle": "work_1",
+                "work_1_summary": "prepared reusable work context `work_1`"
+              }
+            },
+            "observation": {
+              "tool": "PrepareScene",
+              "status": "OK",
+              "summary": "prepared reusable work context `work_1`",
+              "produced_handle": "work_1"
+            }
+          }
+        },
+        {
+          "thought": "The requested evidence is visible now; hand off a compact completion summary.",
+          "action": {
+            "tool": "TaskComplete",
+            "status": "TASK_COMPLETE",
+            "summary": "Contract complete: a validated reusable work context is ready with source metadata, units, masks, and schema cues preserved. Latest handle `work_1`; fields: handle, type, mode, requested_mode, checks, inputs, allowed_slots, core_slots."
+          }
+        }
+      ]
+    },
+    {
+      "step_id": "s2",
+      "agent": "PA",
+      "turns": [
+        {
+          "thought": "The prepared work context contains the needed evidence; compute metrics {\"loss_area_ha_by_year\": true}.",
+          "action": {
+            "tool": "ComputeStats",
+            "args": {
+              "question": "question_1",
+              "work": "work_1",
+              "metrics": {
+                "loss_area_ha_by_year": true
+              },
+              "region": "aoi"
+            }
+          },
+          "tool_output": {
+            "ok": true,
+            "text": "computed statistics `stats_1`",
+            "produced": {
+              "artifacts": [],
+              "layers": [],
+              "fields": {
+                "latest_tool": "ComputeStats",
+                "latest_tool_ok": true,
+                "latest_summary": "computed statistics `stats_1`",
+                "latest_handle": "stats_1",
+                "stats_1_summary": "computed statistics `stats_1`",
+                "stats_1_evidence": {
+                  "metrics": {
+                    "forest_loss_history": true,
+                    "loss_area_ha_by_year": true
+                  },
+                  "top_loss_years_ha": [
+                    {
+                      "year": "2016",
+                      "area_ha": 201.04
+                    },
+                    {
+                      "year": "2014",
+                      "area_ha": 84.972
+                    },
+                    {
+                      "year": "2018",
+                      "area_ha": 77.557
+                    },
+                    {
+                      "year": "2012",
+                      "area_ha": 69.962
+                    },
+                    {
+                      "year": "2017",
+                      "area_ha": 67.639
+                    }
+                  ]
+                },
+                "stats_1_payload": {
+                  "metrics": {
+                    "forest_loss_history": true,
+                    "loss_area_ha_by_year": true
+                  },
+                  "loss_year_histogram_ha": {
+                    "2001": 3.931429,
+                    "2002": 0.446755,
+                    "2004": 33.50655,
+                    "2005": 32.881024,
+                    "2006": 7.237343,
+                    "2007": 9.471132,
+                    "2008": 29.574962,
+                    "2009": 64.689734,
+                    "2010": 17.780768,
+                    "2011": 42.888222,
+                    "2012": 69.961568,
+                    "2013": 31.004624,
+                    "2014": 84.972485,
+                    "2015": 34.668208,
+                    "2016": 201.039833,
+                    "2017": 67.638666,
+                    "2018": 77.556707,
+                    "2019": 52.985072,
+                    "2020": 20.550704,
+                    "2021": 12.955869,
+                    "2022": 8.75641,
+                    "2023": 16.619214
+                  },
+                  "valid_pixel_count": 29412,
+                  "analysis_window": {
+                    "start_year": 2001,
+                    "end_year": 2023
+                  },
+                  "measurement_contract": "hansen_grid_area_by_year_v1"
+                },
+                "stats_1_payload_keys": [
+                  "metrics",
+                  "loss_year_histogram_ha",
+                  "valid_pixel_count",
+                  "analysis_window",
+                  "measurement_contract"
+                ]
+              }
+            },
+            "observation": {
+              "tool": "ComputeStats",
+              "status": "OK",
+              "summary": "computed statistics `stats_1`",
+              "produced_handle": "stats_1",
+              "evidence": {
+                "metrics": {
+                  "forest_loss_history": true,
+                  "loss_area_ha_by_year": true
+                },
+                "top_loss_years_ha": [
+                  {
+                    "year": "2016",
+                    "area_ha": 201.04
+                  },
+                  {
+                    "year": "2014",
+                    "area_ha": 84.972
+                  },
+                  {
+                    "year": "2018",
+                    "area_ha": 77.557
+                  },
+                  {
+                    "year": "2012",
+                    "area_ha": 69.962
+                  },
+                  {
+                    "year": "2017",
+                    "area_ha": 67.639
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "thought": "Change evidence is required; detect `largest_loss_year` over `2001_2023`.",
+          "action": {
+            "tool": "DetectChange",
+            "args": {
+              "question": "question_1",
+              "work": "stats_1",
+              "change": "largest_loss_year",
+              "window": "2001_2023"
+            }
+          },
+          "tool_output": {
+            "ok": true,
+            "text": "detected change `change_1`",
+            "produced": {
+              "artifacts": [],
+              "layers": [],
+              "fields": {
+                "latest_tool": "DetectChange",
+                "latest_tool_ok": true,
+                "latest_summary": "detected change `change_1`",
+                "latest_handle": "change_1",
+                "change_1_summary": "detected change `change_1`",
+                "change_1_payload": {
+                  "change": "largest_loss_year",
+                  "window": "2001_2023",
+                  "year": 2016,
+                  "loss_ha": 201.039833,
+                  "loss_area_ha_by_year": {
+                    "2001": 3.931429,
+                    "2002": 0.446755,
+                    "2004": 33.50655,
+                    "2005": 32.881024,
+                    "2006": 7.237343,
+                    "2007": 9.471132,
+                    "2008": 29.574962,
+                    "2009": 64.689734,
+                    "2010": 17.780768,
+                    "2011": 42.888222,
+                    "2012": 69.961568,
+                    "2013": 31.004624,
+                    "2014": 84.972485,
+                    "2015": 34.668208,
+                    "2016": 201.039833,
+                    "2017": 67.638666,
+                    "2018": 77.556707,
+                    "2019": 52.985072,
+                    "2020": 20.550704,
+                    "2021": 12.955869,
+                    "2022": 8.75641,
+                    "2023": 16.619214
+                  },
+                  "tie_break_rule": "earliest_year",
+                  "measurement_contract": "hansen_grid_area_by_year_v1"
+                },
+                "change_1_payload_keys": [
+                  "change",
+                  "window",
+                  "year",
+                  "loss_ha",
+                  "loss_area_ha_by_year",
+                  "tie_break_rule",
+                  "measurement_contract"
+                ]
+              }
+            },
+            "observation": {
+              "tool": "DetectChange",
+              "status": "OK",
+              "summary": "detected change `change_1`",
+              "produced_handle": "change_1"
+            }
+          }
+        },
+        {
+          "thought": "The requested evidence is visible now; hand off a compact completion summary.",
+          "action": {
+            "tool": "TaskComplete",
+            "status": "TASK_COMPLETE",
+            "summary": "Contract complete: the requested statistic has been computed with units/support fields. Latest handle `change_1`; fields: change, window, year, loss_ha, loss_area_ha_by_year."
+          }
+        }
+      ]
+    }
+  ],
+  "expected_final_answer": {
+    "year": 2016,
+    "loss_ha": 201.039833
+  },
+  "gt_chain": [
+    {
+      "tool": "ReadData",
+      "args": {
+        "question": "question_1",
+        "input": "forest_loss_history_1",
+        "role": "hansen",
+        "time": "2001_2023"
+      }
+    },
+    {
+      "tool": "PrepareScene",
+      "args": {
+        "question": "question_1",
+        "inputs": {
+          "loss_history": "scene_1"
+        },
+        "mode": "forest_loss_history"
+      }
+    },
+    {
+      "tool": "ComputeStats",
+      "args": {
+        "question": "question_1",
+        "work": "work_1",
+        "metrics": {
+          "loss_area_ha_by_year": true
+        },
+        "region": "aoi"
+      }
+    },
+    {
+      "tool": "DetectChange",
+      "args": {
+        "question": "question_1",
+        "work": "stats_1",
+        "change": "largest_loss_year",
+        "window": "2001_2023"
+      }
+    },
+    {
+      "tool": "TaskComplete",
+      "args": {
+        "status": "TASK_COMPLETE",
+        "summary": "Return the six-decimal largest-loss area and its earliest equal-area year, or no_loss."
+      }
+    }
+  ],
+  "pure_toolchain_sim_status": "passed",
+  "answer_support": {
+    "score": 1.0,
+    "basis": "schema_valid_runtime_projection",
+    "resolved_answer_sha256": "cbc090ae5b3fb15559fef5830865e1a4eedfd5ab1dfb3b99cd66e1663626ad8f",
+    "diagnostic_only": true,
+    "note": "The successful worker payload projected to a schema-valid terminal answer. Strict structured terminal-answer scoring determines correctness."
+  },
+  "split_group_id": "deforestation:dcc44acc1e653f33",
+  "training_weight": 1.0,
+  "training_weight_contract": "inverse_complete_trajectory_multiplicity_v1",
+  "orchestration_flow": [
+    {
+      "role": "ORC",
+      "phase": "Plan",
+      "goal": "Resolve the deterministic deforestation / multi year loss attribution task using the declared handles and answer schema.",
+      "steps": [
+        {
+          "id": "s1",
+          "agent": "GA",
+          "subtask": "GA contract for deterministic deforestation / multi year loss attribution: prepare reusable evidence from forest_loss_history_1. Preserve units, temporal/source metadata, masks, and schema cues so later reasoning has a compact grounded work context.",
+          "needs": [
+            "question_1",
+            "forest_loss_history_1"
+          ]
+        },
+        {
+          "id": "s2",
+          "agent": "PA",
+          "subtask": "PA contract for deterministic deforestation / multi year loss attribution: compute the requested statistic from prepared evidence. Report the value, units, and support fields needed by ORC.",
+          "needs": [
+            "question_1",
+            "work_1"
+          ]
+        }
+      ]
+    },
+    {
+      "role": "ORC",
+      "phase": "CallAgent",
+      "step_id": "s1",
+      "agent": "GA",
+      "contract": "GA contract for deterministic deforestation / multi year loss attribution: prepare reusable evidence from forest_loss_history_1. Preserve units, temporal/source metadata, masks, and schema cues so later reasoning has a compact grounded work context.",
+      "needs": [
+        "question_1",
+        "forest_loss_history_1"
+      ]
+    },
+    {
+      "role": "GA",
+      "phase": "TaskComplete",
+      "step_id": "s1",
+      "summary": "Contract complete: a validated reusable work context is ready with source metadata, units, masks, and schema cues preserved. Latest handle `work_1`; fields: handle, type, mode, requested_mode, checks, inputs, allowed_slots, core_slots."
+    },
+    {
+      "role": "ORC",
+      "phase": "CallAgent",
+      "step_id": "s2",
+      "agent": "PA",
+      "contract": "PA contract for deterministic deforestation / multi year loss attribution: compute the requested statistic from prepared evidence. Report the value, units, and support fields needed by ORC.",
+      "needs": [
+        "question_1",
+        "work_1"
+      ]
+    },
+    {
+      "role": "PA",
+      "phase": "TaskComplete",
+      "step_id": "s2",
+      "summary": "Contract complete: the requested statistic has been computed with units/support fields. Latest handle `change_1`; fields: change, window, year, loss_ha, loss_area_ha_by_year."
+    },
+    {
+      "role": "ORC",
+      "phase": "Terminate",
+      "answer_ref": "ANSWER_JSON:answer_1"
+    }
+  ],
+  "interleaved_gt_flow": [
+    {
+      "turn": 1,
+      "role": "USER",
+      "phase": "QuestionToORC",
+      "target": "ORC",
+      "snap": {
+        "question": "Using only Hansen lossyear codes 1 through 23 (calendar years 2001 through 2023) inside this AOI, compute each year's grid-aware loss area in hectares and return the year with the largest area plus that six-decimal area. Break an equal six-decimal area tie in favor of the earliest year. If no valid pixel has a code from 1 through 23, return year 'no_loss' and loss_ha 0.0. Code 0 is valid no-loss and nodata 255 is excluded.",
+        "available_input_handles": [
+          {
+            "handle": "forest_loss_history_1",
+            "kind": "forest_loss_history",
+            "summary": "forest_loss_history_1: Full Hansen lossyear raster for 2001-2023 attribution.; refs: lossyear.tif"
+          },
+          {
+            "handle": "question_1",
+            "kind": "question",
+            "summary": "question_1: Current natural-language question and schema handle."
+          }
+        ],
+        "instruction": "Plan evidence contracts; do not call tools."
+      }
+    },
+    {
+      "turn": 2,
+      "role": "ORC",
+      "phase": "Plan",
+      "output": {
+        "goal": "Resolve the deterministic deforestation / multi year loss attribution task using the declared handles and answer schema.",
+        "steps": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "subtask": "GA contract for deterministic deforestation / multi year loss attribution: prepare reusable evidence from forest_loss_history_1. Preserve units, temporal/source metadata, masks, and schema cues so later reasoning has a compact grounded work context.",
+            "needs": [
+              "question_1",
+              "forest_loss_history_1"
+            ]
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "subtask": "PA contract for deterministic deforestation / multi year loss attribution: compute the requested statistic from prepared evidence. Report the value, units, and support fields needed by ORC.",
+            "needs": [
+              "question_1",
+              "work_1"
+            ]
+          }
+        ]
+      },
+      "reasoning_snap": "Split the task into evidence contracts by specialist capability; do not expose tool order."
+    },
+    {
+      "turn": 3,
+      "role": "USER",
+      "phase": "DecisionContextToORC",
+      "target": "ORC",
+      "snap": {
+        "last_agent_report": null,
+        "pending_step": {
+          "id": "s1",
+          "agent": "GA",
+          "contract": "GA contract for deterministic deforestation / multi year loss attribution: prepare reusable evidence from forest_loss_history_1. Preserve units, temporal/source metadata, masks, and schema cues so later reasoning has a compact grounded work context.",
+          "needs": [
+            "question_1",
+            "forest_loss_history_1"
+          ]
+        },
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "pending"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "pending"
+          }
+        ]
+      }
+    },
+    {
+      "turn": 4,
+      "role": "ORC",
+      "phase": "CallAgent",
+      "output": {
+        "tool": "CallAgent",
+        "step_id": "s1"
+      },
+      "reasoning_snap": "Delegate `s1` to GA because that specialist owns this evidence contract."
+    },
+    {
+      "turn": 5,
+      "role": "USER",
+      "phase": "SpecialistInput",
+      "target": "GA",
+      "step_id": "s1",
+      "snap": {
+        "contract": "GA contract for deterministic deforestation / multi year loss attribution: prepare reusable evidence from forest_loss_history_1. Preserve units, temporal/source metadata, masks, and schema cues so later reasoning has a compact grounded work context.",
+        "needs": [
+          "question_1",
+          "forest_loss_history_1"
+        ],
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "running"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "pending"
+          }
+        ],
+        "allowed_tools": [
+          "ReadData",
+          "PrepareScene",
+          "MeasureArea",
+          "ExtractObjects",
+          "MapFlood",
+          "RenderMap",
+          "TaskComplete"
+        ],
+        "visible_context": {
+          "needed_context": [
+            {
+              "handle": "question_1",
+              "kind": "question",
+              "summary": "question_1: Current natural-language question and schema handle.",
+              "source": "initial_input"
+            },
+            {
+              "handle": "forest_loss_history_1",
+              "kind": "forest_loss_history",
+              "summary": "forest_loss_history_1: Full Hansen lossyear raster for 2001-2023 attribution.; refs: lossyear.tif",
+              "source": "initial_input"
+            }
+          ],
+          "produced_context": []
+        },
+        "instruction": "Initial specialist handoff: use listed needs and prior artifacts only."
+      }
+    },
+    {
+      "turn": 6,
+      "role": "GA",
+      "phase": "ToolCall",
+      "step_id": "s1",
+      "thought": "Need a verified scene handle for `forest_loss_history_1` before any downstream evidence step.",
+      "output": {
+        "tool": "ReadData",
+        "args": {
+          "question": "question_1",
+          "input": "forest_loss_history_1",
+          "role": "hansen",
+          "time": "2001_2023"
+        }
+      }
+    },
+    {
+      "turn": 7,
+      "role": "USER",
+      "phase": "ToolObservation",
+      "target": "GA",
+      "step_id": "s1",
+      "snap": {
+        "tool": "ReadData",
+        "status": "OK",
+        "summary": "opened input as `scene_1`",
+        "produced_handle": "scene_1"
+      }
+    },
+    {
+      "turn": 8,
+      "role": "USER",
+      "phase": "SpecialistInput",
+      "target": "GA",
+      "step_id": "s1",
+      "snap": {
+        "contract": "GA contract for deterministic deforestation / multi year loss attribution: prepare reusable evidence from forest_loss_history_1. Preserve units, temporal/source metadata, masks, and schema cues so later reasoning has a compact grounded work context.",
+        "needs": [
+          "question_1",
+          "forest_loss_history_1"
+        ],
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "running"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "pending"
+          }
+        ],
+        "allowed_tools": [
+          "ReadData",
+          "PrepareScene",
+          "MeasureArea",
+          "ExtractObjects",
+          "MapFlood",
+          "RenderMap",
+          "TaskComplete"
+        ],
+        "visible_context": {
+          "needed_context": [
+            {
+              "handle": "question_1",
+              "kind": "question",
+              "summary": "question_1: Current natural-language question and schema handle.",
+              "source": "initial_input"
+            },
+            {
+              "handle": "forest_loss_history_1",
+              "kind": "forest_loss_history",
+              "summary": "forest_loss_history_1: Full Hansen lossyear raster for 2001-2023 attribution.; refs: lossyear.tif",
+              "source": "initial_input"
+            }
+          ],
+          "produced_context": [
+            {
+              "handle": "scene_1",
+              "kind": "scene",
+              "summary": "opened input as `scene_1`",
+              "evidence": {}
+            }
+          ],
+          "last_observation": {
+            "tool": "ReadData",
+            "status": "OK",
+            "summary": "opened input as `scene_1`",
+            "produced_handle": "scene_1"
+          }
+        },
+        "instruction": "Continue from the latest tool observation; finish if the contract evidence is present."
+      }
+    },
+    {
+      "turn": 9,
+      "role": "GA",
+      "phase": "ToolCall",
+      "step_id": "s1",
+      "thought": "Opened scenes are ready; combine {\"loss_history\": \"scene_1\"} into a `forest_loss_history` work context with units, masks, and metadata preserved.",
+      "output": {
+        "tool": "PrepareScene",
+        "args": {
+          "question": "question_1",
+          "inputs": {
+            "loss_history": "scene_1"
+          },
+          "mode": "forest_loss_history"
+        }
+      }
+    },
+    {
+      "turn": 10,
+      "role": "USER",
+      "phase": "ToolObservation",
+      "target": "GA",
+      "step_id": "s1",
+      "snap": {
+        "tool": "PrepareScene",
+        "status": "OK",
+        "summary": "prepared reusable work context `work_1`",
+        "produced_handle": "work_1"
+      }
+    },
+    {
+      "turn": 11,
+      "role": "USER",
+      "phase": "SpecialistInput",
+      "target": "GA",
+      "step_id": "s1",
+      "snap": {
+        "contract": "GA contract for deterministic deforestation / multi year loss attribution: prepare reusable evidence from forest_loss_history_1. Preserve units, temporal/source metadata, masks, and schema cues so later reasoning has a compact grounded work context.",
+        "needs": [
+          "question_1",
+          "forest_loss_history_1"
+        ],
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "running"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "pending"
+          }
+        ],
+        "allowed_tools": [
+          "ReadData",
+          "PrepareScene",
+          "MeasureArea",
+          "ExtractObjects",
+          "MapFlood",
+          "RenderMap",
+          "TaskComplete"
+        ],
+        "visible_context": {
+          "needed_context": [
+            {
+              "handle": "question_1",
+              "kind": "question",
+              "summary": "question_1: Current natural-language question and schema handle.",
+              "source": "initial_input"
+            },
+            {
+              "handle": "forest_loss_history_1",
+              "kind": "forest_loss_history",
+              "summary": "forest_loss_history_1: Full Hansen lossyear raster for 2001-2023 attribution.; refs: lossyear.tif",
+              "source": "initial_input"
+            }
+          ],
+          "produced_context": [
+            {
+              "handle": "scene_1",
+              "kind": "scene",
+              "summary": "opened input as `scene_1`",
+              "evidence": {}
+            },
+            {
+              "handle": "work_1",
+              "kind": "work",
+              "summary": "prepared reusable work context `work_1`",
+              "evidence": {}
+            }
+          ],
+          "last_observation": {
+            "tool": "PrepareScene",
+            "status": "OK",
+            "summary": "prepared reusable work context `work_1`",
+            "produced_handle": "work_1"
+          }
+        },
+        "instruction": "Continue from the latest tool observation; finish if the contract evidence is present."
+      }
+    },
+    {
+      "turn": 12,
+      "role": "GA",
+      "phase": "TaskComplete",
+      "step_id": "s1",
+      "thought": "The requested evidence is visible now; hand off a compact completion summary.",
+      "output": {
+        "tool": "TaskComplete",
+        "status": "TASK_COMPLETE",
+        "summary": "Contract complete: a validated reusable work context is ready with source metadata, units, masks, and schema cues preserved. Latest handle `work_1`; fields: handle, type, mode, requested_mode, checks, inputs, allowed_slots, core_slots."
+      }
+    },
+    {
+      "turn": 13,
+      "role": "USER",
+      "phase": "DecisionContextToORC",
+      "target": "ORC",
+      "snap": {
+        "last_agent_report": {
+          "agent": "GA",
+          "step_id": "s1",
+          "status": "TASK_COMPLETE",
+          "summary": "Contract complete: a validated reusable work context is ready with source metadata, units, masks, and schema cues preserved. Latest handle `work_1`; fields: handle, type, mode, requested_mode, checks, inputs, allowed_slots, core_slots."
+        },
+        "pending_step": {
+          "id": "s2",
+          "agent": "PA",
+          "contract": "PA contract for deterministic deforestation / multi year loss attribution: compute the requested statistic from prepared evidence. Report the value, units, and support fields needed by ORC.",
+          "needs": [
+            "question_1",
+            "work_1"
+          ]
+        },
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "done"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "pending"
+          }
+        ]
+      }
+    },
+    {
+      "turn": 14,
+      "role": "ORC",
+      "phase": "CallAgent",
+      "output": {
+        "tool": "CallAgent",
+        "step_id": "s2"
+      },
+      "reasoning_snap": "Delegate `s2` to PA because that specialist owns this evidence contract."
+    },
+    {
+      "turn": 15,
+      "role": "USER",
+      "phase": "SpecialistInput",
+      "target": "PA",
+      "step_id": "s2",
+      "snap": {
+        "contract": "PA contract for deterministic deforestation / multi year loss attribution: compute the requested statistic from prepared evidence. Report the value, units, and support fields needed by ORC.",
+        "needs": [
+          "question_1",
+          "work_1"
+        ],
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "done"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "running"
+          }
+        ],
+        "allowed_tools": [
+          "ComputeStats",
+          "CompareSources",
+          "DetectChange",
+          "ClassifyChange",
+          "ScoreHazard",
+          "EstimateExposure",
+          "RankRegions",
+          "PlanRoutes",
+          "CompareRoutes",
+          "TaskComplete"
+        ],
+        "visible_context": {
+          "needed_context": [
+            {
+              "handle": "question_1",
+              "kind": "question",
+              "summary": "question_1: Current natural-language question and schema handle.",
+              "source": "initial_input"
+            },
+            {
+              "handle": "work_1",
+              "kind": "work",
+              "summary": "prepared reusable work context `work_1`",
+              "evidence": {},
+              "source": "produced"
+            }
+          ],
+          "produced_context": [
+            {
+              "handle": "scene_1",
+              "kind": "scene",
+              "summary": "opened input as `scene_1`",
+              "evidence": {}
+            },
+            {
+              "handle": "work_1",
+              "kind": "work",
+              "summary": "prepared reusable work context `work_1`",
+              "evidence": {}
+            }
+          ]
+        },
+        "instruction": "Initial specialist handoff: use listed needs and prior artifacts only."
+      }
+    },
+    {
+      "turn": 16,
+      "role": "PA",
+      "phase": "ToolCall",
+      "step_id": "s2",
+      "thought": "The prepared work context contains the needed evidence; compute metrics {\"loss_area_ha_by_year\": true}.",
+      "output": {
+        "tool": "ComputeStats",
+        "args": {
+          "question": "question_1",
+          "work": "work_1",
+          "metrics": {
+            "loss_area_ha_by_year": true
+          },
+          "region": "aoi"
+        }
+      }
+    },
+    {
+      "turn": 17,
+      "role": "USER",
+      "phase": "ToolObservation",
+      "target": "PA",
+      "step_id": "s2",
+      "snap": {
+        "tool": "ComputeStats",
+        "status": "OK",
+        "summary": "computed statistics `stats_1`",
+        "produced_handle": "stats_1",
+        "evidence": {
+          "metrics": {
+            "forest_loss_history": true,
+            "loss_area_ha_by_year": true
+          },
+          "top_loss_years_ha": [
+            {
+              "year": "2016",
+              "area_ha": 201.04
+            },
+            {
+              "year": "2014",
+              "area_ha": 84.972
+            },
+            {
+              "year": "2018",
+              "area_ha": 77.557
+            },
+            {
+              "year": "2012",
+              "area_ha": 69.962
+            },
+            {
+              "year": "2017",
+              "area_ha": 67.639
+            }
+          ]
+        }
+      }
+    },
+    {
+      "turn": 18,
+      "role": "USER",
+      "phase": "SpecialistInput",
+      "target": "PA",
+      "step_id": "s2",
+      "snap": {
+        "contract": "PA contract for deterministic deforestation / multi year loss attribution: compute the requested statistic from prepared evidence. Report the value, units, and support fields needed by ORC.",
+        "needs": [
+          "question_1",
+          "work_1"
+        ],
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "done"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "running"
+          }
+        ],
+        "allowed_tools": [
+          "ComputeStats",
+          "CompareSources",
+          "DetectChange",
+          "ClassifyChange",
+          "ScoreHazard",
+          "EstimateExposure",
+          "RankRegions",
+          "PlanRoutes",
+          "CompareRoutes",
+          "TaskComplete"
+        ],
+        "visible_context": {
+          "needed_context": [
+            {
+              "handle": "question_1",
+              "kind": "question",
+              "summary": "question_1: Current natural-language question and schema handle.",
+              "source": "initial_input"
+            },
+            {
+              "handle": "work_1",
+              "kind": "work",
+              "summary": "prepared reusable work context `work_1`",
+              "evidence": {},
+              "source": "produced"
+            }
+          ],
+          "produced_context": [
+            {
+              "handle": "scene_1",
+              "kind": "scene",
+              "summary": "opened input as `scene_1`",
+              "evidence": {}
+            },
+            {
+              "handle": "work_1",
+              "kind": "work",
+              "summary": "prepared reusable work context `work_1`",
+              "evidence": {}
+            },
+            {
+              "handle": "stats_1",
+              "kind": "stats",
+              "summary": "computed statistics `stats_1`",
+              "evidence": {
+                "metrics": {
+                  "forest_loss_history": true,
+                  "loss_area_ha_by_year": true
+                },
+                "top_loss_years_ha": [
+                  {
+                    "year": "2016",
+                    "area_ha": 201.04
+                  },
+                  {
+                    "year": "2014",
+                    "area_ha": 84.972
+                  },
+                  {
+                    "year": "2018",
+                    "area_ha": 77.557
+                  },
+                  {
+                    "year": "2012",
+                    "area_ha": 69.962
+                  },
+                  {
+                    "year": "2017",
+                    "area_ha": 67.639
+                  }
+                ]
+              }
+            }
+          ],
+          "last_observation": {
+            "tool": "ComputeStats",
+            "status": "OK",
+            "summary": "computed statistics `stats_1`",
+            "produced_handle": "stats_1",
+            "evidence": {
+              "metrics": {
+                "forest_loss_history": true,
+                "loss_area_ha_by_year": true
+              },
+              "top_loss_years_ha": [
+                {
+                  "year": "2016",
+                  "area_ha": 201.04
+                },
+                {
+                  "year": "2014",
+                  "area_ha": 84.972
+                },
+                {
+                  "year": "2018",
+                  "area_ha": 77.557
+                },
+                {
+                  "year": "2012",
+                  "area_ha": 69.962
+                },
+                {
+                  "year": "2017",
+                  "area_ha": 67.639
+                }
+              ]
+            }
+          }
+        },
+        "instruction": "Continue from the latest tool observation; finish if the contract evidence is present."
+      }
+    },
+    {
+      "turn": 19,
+      "role": "PA",
+      "phase": "ToolCall",
+      "step_id": "s2",
+      "thought": "Change evidence is required; detect `largest_loss_year` over `2001_2023`.",
+      "output": {
+        "tool": "DetectChange",
+        "args": {
+          "question": "question_1",
+          "work": "stats_1",
+          "change": "largest_loss_year",
+          "window": "2001_2023"
+        }
+      }
+    },
+    {
+      "turn": 20,
+      "role": "USER",
+      "phase": "ToolObservation",
+      "target": "PA",
+      "step_id": "s2",
+      "snap": {
+        "tool": "DetectChange",
+        "status": "OK",
+        "summary": "detected change `change_1`",
+        "produced_handle": "change_1"
+      }
+    },
+    {
+      "turn": 21,
+      "role": "USER",
+      "phase": "SpecialistInput",
+      "target": "PA",
+      "step_id": "s2",
+      "snap": {
+        "contract": "PA contract for deterministic deforestation / multi year loss attribution: compute the requested statistic from prepared evidence. Report the value, units, and support fields needed by ORC.",
+        "needs": [
+          "question_1",
+          "work_1"
+        ],
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "done"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "running"
+          }
+        ],
+        "allowed_tools": [
+          "ComputeStats",
+          "CompareSources",
+          "DetectChange",
+          "ClassifyChange",
+          "ScoreHazard",
+          "EstimateExposure",
+          "RankRegions",
+          "PlanRoutes",
+          "CompareRoutes",
+          "TaskComplete"
+        ],
+        "visible_context": {
+          "needed_context": [
+            {
+              "handle": "question_1",
+              "kind": "question",
+              "summary": "question_1: Current natural-language question and schema handle.",
+              "source": "initial_input"
+            },
+            {
+              "handle": "work_1",
+              "kind": "work",
+              "summary": "prepared reusable work context `work_1`",
+              "evidence": {},
+              "source": "produced"
+            }
+          ],
+          "produced_context": [
+            {
+              "handle": "scene_1",
+              "kind": "scene",
+              "summary": "opened input as `scene_1`",
+              "evidence": {}
+            },
+            {
+              "handle": "work_1",
+              "kind": "work",
+              "summary": "prepared reusable work context `work_1`",
+              "evidence": {}
+            },
+            {
+              "handle": "stats_1",
+              "kind": "stats",
+              "summary": "computed statistics `stats_1`",
+              "evidence": {
+                "metrics": {
+                  "forest_loss_history": true,
+                  "loss_area_ha_by_year": true
+                },
+                "top_loss_years_ha": [
+                  {
+                    "year": "2016",
+                    "area_ha": 201.04
+                  },
+                  {
+                    "year": "2014",
+                    "area_ha": 84.972
+                  },
+                  {
+                    "year": "2018",
+                    "area_ha": 77.557
+                  },
+                  {
+                    "year": "2012",
+                    "area_ha": 69.962
+                  },
+                  {
+                    "year": "2017",
+                    "area_ha": 67.639
+                  }
+                ]
+              }
+            },
+            {
+              "handle": "change_1",
+              "kind": "change",
+              "summary": "detected change `change_1`",
+              "evidence": {}
+            }
+          ],
+          "last_observation": {
+            "tool": "DetectChange",
+            "status": "OK",
+            "summary": "detected change `change_1`",
+            "produced_handle": "change_1"
+          }
+        },
+        "instruction": "Continue from the latest tool observation; finish if the contract evidence is present."
+      }
+    },
+    {
+      "turn": 22,
+      "role": "PA",
+      "phase": "TaskComplete",
+      "step_id": "s2",
+      "thought": "The requested evidence is visible now; hand off a compact completion summary.",
+      "output": {
+        "tool": "TaskComplete",
+        "status": "TASK_COMPLETE",
+        "summary": "Contract complete: the requested statistic has been computed with units/support fields. Latest handle `change_1`; fields: change, window, year, loss_ha, loss_area_ha_by_year."
+      }
+    },
+    {
+      "turn": 23,
+      "role": "USER",
+      "phase": "DecisionContextToORC",
+      "target": "ORC",
+      "snap": {
+        "last_agent_report": {
+          "agent": "PA",
+          "step_id": "s2",
+          "status": "TASK_COMPLETE",
+          "summary": "Contract complete: the requested statistic has been computed with units/support fields. Latest handle `change_1`; fields: change, window, year, loss_ha, loss_area_ha_by_year."
+        },
+        "pending_step": null,
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "done"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "done"
+          }
+        ],
+        "available_answer_refs": [
+          "ANSWER_JSON:answer_1"
+        ]
+      }
+    },
+    {
+      "turn": 24,
+      "role": "ORC",
+      "phase": "Terminate",
+      "output": {
+        "tool": "Terminate",
+        "answer_ref": "ANSWER_JSON:answer_1"
+      },
+      "reasoning_snap": "All delegated contracts are complete and the runtime has published the schema-valid answer reference."
+    }
+  ],
+  "multiagentic_gt_chain": [
+    {
+      "turn": 1,
+      "role": "USER",
+      "phase": "QuestionToORC",
+      "target": "ORC",
+      "snap": {
+        "question": "Using only Hansen lossyear codes 1 through 23 (calendar years 2001 through 2023) inside this AOI, compute each year's grid-aware loss area in hectares and return the year with the largest area plus that six-decimal area. Break an equal six-decimal area tie in favor of the earliest year. If no valid pixel has a code from 1 through 23, return year 'no_loss' and loss_ha 0.0. Code 0 is valid no-loss and nodata 255 is excluded.",
+        "available_input_handles": [
+          {
+            "handle": "forest_loss_history_1",
+            "kind": "forest_loss_history",
+            "summary": "forest_loss_history_1: Full Hansen lossyear raster for 2001-2023 attribution.; refs: lossyear.tif"
+          },
+          {
+            "handle": "question_1",
+            "kind": "question",
+            "summary": "question_1: Current natural-language question and schema handle."
+          }
+        ],
+        "instruction": "Plan evidence contracts; do not call tools."
+      }
+    },
+    {
+      "turn": 2,
+      "role": "ORC",
+      "phase": "Plan",
+      "output": {
+        "goal": "Resolve the deterministic deforestation / multi year loss attribution task using the declared handles and answer schema.",
+        "steps": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "subtask": "GA contract for deterministic deforestation / multi year loss attribution: prepare reusable evidence from forest_loss_history_1. Preserve units, temporal/source metadata, masks, and schema cues so later reasoning has a compact grounded work context.",
+            "needs": [
+              "question_1",
+              "forest_loss_history_1"
+            ]
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "subtask": "PA contract for deterministic deforestation / multi year loss attribution: compute the requested statistic from prepared evidence. Report the value, units, and support fields needed by ORC.",
+            "needs": [
+              "question_1",
+              "work_1"
+            ]
+          }
+        ]
+      },
+      "reasoning_snap": "Split the task into evidence contracts by specialist capability; do not expose tool order."
+    },
+    {
+      "turn": 3,
+      "role": "USER",
+      "phase": "DecisionContextToORC",
+      "target": "ORC",
+      "snap": {
+        "last_agent_report": null,
+        "pending_step": {
+          "id": "s1",
+          "agent": "GA",
+          "contract": "GA contract for deterministic deforestation / multi year loss attribution: prepare reusable evidence from forest_loss_history_1. Preserve units, temporal/source metadata, masks, and schema cues so later reasoning has a compact grounded work context.",
+          "needs": [
+            "question_1",
+            "forest_loss_history_1"
+          ]
+        },
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "pending"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "pending"
+          }
+        ]
+      }
+    },
+    {
+      "turn": 4,
+      "role": "ORC",
+      "phase": "CallAgent",
+      "output": {
+        "tool": "CallAgent",
+        "step_id": "s1"
+      },
+      "reasoning_snap": "Delegate `s1` to GA because that specialist owns this evidence contract."
+    },
+    {
+      "turn": 5,
+      "role": "USER",
+      "phase": "SpecialistInput",
+      "target": "GA",
+      "step_id": "s1",
+      "snap": {
+        "contract": "GA contract for deterministic deforestation / multi year loss attribution: prepare reusable evidence from forest_loss_history_1. Preserve units, temporal/source metadata, masks, and schema cues so later reasoning has a compact grounded work context.",
+        "needs": [
+          "question_1",
+          "forest_loss_history_1"
+        ],
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "running"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "pending"
+          }
+        ],
+        "allowed_tools": [
+          "ReadData",
+          "PrepareScene",
+          "MeasureArea",
+          "ExtractObjects",
+          "MapFlood",
+          "RenderMap",
+          "TaskComplete"
+        ],
+        "visible_context": {
+          "needed_context": [
+            {
+              "handle": "question_1",
+              "kind": "question",
+              "summary": "question_1: Current natural-language question and schema handle.",
+              "source": "initial_input"
+            },
+            {
+              "handle": "forest_loss_history_1",
+              "kind": "forest_loss_history",
+              "summary": "forest_loss_history_1: Full Hansen lossyear raster for 2001-2023 attribution.; refs: lossyear.tif",
+              "source": "initial_input"
+            }
+          ],
+          "produced_context": []
+        },
+        "instruction": "Initial specialist handoff: use listed needs and prior artifacts only."
+      }
+    },
+    {
+      "turn": 6,
+      "role": "GA",
+      "phase": "ToolCall",
+      "step_id": "s1",
+      "thought": "Need a verified scene handle for `forest_loss_history_1` before any downstream evidence step.",
+      "output": {
+        "tool": "ReadData",
+        "args": {
+          "question": "question_1",
+          "input": "forest_loss_history_1",
+          "role": "hansen",
+          "time": "2001_2023"
+        }
+      }
+    },
+    {
+      "turn": 7,
+      "role": "USER",
+      "phase": "ToolObservation",
+      "target": "GA",
+      "step_id": "s1",
+      "snap": {
+        "tool": "ReadData",
+        "status": "OK",
+        "summary": "opened input as `scene_1`",
+        "produced_handle": "scene_1"
+      }
+    },
+    {
+      "turn": 8,
+      "role": "USER",
+      "phase": "SpecialistInput",
+      "target": "GA",
+      "step_id": "s1",
+      "snap": {
+        "contract": "GA contract for deterministic deforestation / multi year loss attribution: prepare reusable evidence from forest_loss_history_1. Preserve units, temporal/source metadata, masks, and schema cues so later reasoning has a compact grounded work context.",
+        "needs": [
+          "question_1",
+          "forest_loss_history_1"
+        ],
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "running"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "pending"
+          }
+        ],
+        "allowed_tools": [
+          "ReadData",
+          "PrepareScene",
+          "MeasureArea",
+          "ExtractObjects",
+          "MapFlood",
+          "RenderMap",
+          "TaskComplete"
+        ],
+        "visible_context": {
+          "needed_context": [
+            {
+              "handle": "question_1",
+              "kind": "question",
+              "summary": "question_1: Current natural-language question and schema handle.",
+              "source": "initial_input"
+            },
+            {
+              "handle": "forest_loss_history_1",
+              "kind": "forest_loss_history",
+              "summary": "forest_loss_history_1: Full Hansen lossyear raster for 2001-2023 attribution.; refs: lossyear.tif",
+              "source": "initial_input"
+            }
+          ],
+          "produced_context": [
+            {
+              "handle": "scene_1",
+              "kind": "scene",
+              "summary": "opened input as `scene_1`",
+              "evidence": {}
+            }
+          ],
+          "last_observation": {
+            "tool": "ReadData",
+            "status": "OK",
+            "summary": "opened input as `scene_1`",
+            "produced_handle": "scene_1"
+          }
+        },
+        "instruction": "Continue from the latest tool observation; finish if the contract evidence is present."
+      }
+    },
+    {
+      "turn": 9,
+      "role": "GA",
+      "phase": "ToolCall",
+      "step_id": "s1",
+      "thought": "Opened scenes are ready; combine {\"loss_history\": \"scene_1\"} into a `forest_loss_history` work context with units, masks, and metadata preserved.",
+      "output": {
+        "tool": "PrepareScene",
+        "args": {
+          "question": "question_1",
+          "inputs": {
+            "loss_history": "scene_1"
+          },
+          "mode": "forest_loss_history"
+        }
+      }
+    },
+    {
+      "turn": 10,
+      "role": "USER",
+      "phase": "ToolObservation",
+      "target": "GA",
+      "step_id": "s1",
+      "snap": {
+        "tool": "PrepareScene",
+        "status": "OK",
+        "summary": "prepared reusable work context `work_1`",
+        "produced_handle": "work_1"
+      }
+    },
+    {
+      "turn": 11,
+      "role": "USER",
+      "phase": "SpecialistInput",
+      "target": "GA",
+      "step_id": "s1",
+      "snap": {
+        "contract": "GA contract for deterministic deforestation / multi year loss attribution: prepare reusable evidence from forest_loss_history_1. Preserve units, temporal/source metadata, masks, and schema cues so later reasoning has a compact grounded work context.",
+        "needs": [
+          "question_1",
+          "forest_loss_history_1"
+        ],
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "running"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "pending"
+          }
+        ],
+        "allowed_tools": [
+          "ReadData",
+          "PrepareScene",
+          "MeasureArea",
+          "ExtractObjects",
+          "MapFlood",
+          "RenderMap",
+          "TaskComplete"
+        ],
+        "visible_context": {
+          "needed_context": [
+            {
+              "handle": "question_1",
+              "kind": "question",
+              "summary": "question_1: Current natural-language question and schema handle.",
+              "source": "initial_input"
+            },
+            {
+              "handle": "forest_loss_history_1",
+              "kind": "forest_loss_history",
+              "summary": "forest_loss_history_1: Full Hansen lossyear raster for 2001-2023 attribution.; refs: lossyear.tif",
+              "source": "initial_input"
+            }
+          ],
+          "produced_context": [
+            {
+              "handle": "scene_1",
+              "kind": "scene",
+              "summary": "opened input as `scene_1`",
+              "evidence": {}
+            },
+            {
+              "handle": "work_1",
+              "kind": "work",
+              "summary": "prepared reusable work context `work_1`",
+              "evidence": {}
+            }
+          ],
+          "last_observation": {
+            "tool": "PrepareScene",
+            "status": "OK",
+            "summary": "prepared reusable work context `work_1`",
+            "produced_handle": "work_1"
+          }
+        },
+        "instruction": "Continue from the latest tool observation; finish if the contract evidence is present."
+      }
+    },
+    {
+      "turn": 12,
+      "role": "GA",
+      "phase": "TaskComplete",
+      "step_id": "s1",
+      "thought": "The requested evidence is visible now; hand off a compact completion summary.",
+      "output": {
+        "tool": "TaskComplete",
+        "status": "TASK_COMPLETE",
+        "summary": "Contract complete: a validated reusable work context is ready with source metadata, units, masks, and schema cues preserved. Latest handle `work_1`; fields: handle, type, mode, requested_mode, checks, inputs, allowed_slots, core_slots."
+      }
+    },
+    {
+      "turn": 13,
+      "role": "USER",
+      "phase": "DecisionContextToORC",
+      "target": "ORC",
+      "snap": {
+        "last_agent_report": {
+          "agent": "GA",
+          "step_id": "s1",
+          "status": "TASK_COMPLETE",
+          "summary": "Contract complete: a validated reusable work context is ready with source metadata, units, masks, and schema cues preserved. Latest handle `work_1`; fields: handle, type, mode, requested_mode, checks, inputs, allowed_slots, core_slots."
+        },
+        "pending_step": {
+          "id": "s2",
+          "agent": "PA",
+          "contract": "PA contract for deterministic deforestation / multi year loss attribution: compute the requested statistic from prepared evidence. Report the value, units, and support fields needed by ORC.",
+          "needs": [
+            "question_1",
+            "work_1"
+          ]
+        },
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "done"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "pending"
+          }
+        ]
+      }
+    },
+    {
+      "turn": 14,
+      "role": "ORC",
+      "phase": "CallAgent",
+      "output": {
+        "tool": "CallAgent",
+        "step_id": "s2"
+      },
+      "reasoning_snap": "Delegate `s2` to PA because that specialist owns this evidence contract."
+    },
+    {
+      "turn": 15,
+      "role": "USER",
+      "phase": "SpecialistInput",
+      "target": "PA",
+      "step_id": "s2",
+      "snap": {
+        "contract": "PA contract for deterministic deforestation / multi year loss attribution: compute the requested statistic from prepared evidence. Report the value, units, and support fields needed by ORC.",
+        "needs": [
+          "question_1",
+          "work_1"
+        ],
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "done"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "running"
+          }
+        ],
+        "allowed_tools": [
+          "ComputeStats",
+          "CompareSources",
+          "DetectChange",
+          "ClassifyChange",
+          "ScoreHazard",
+          "EstimateExposure",
+          "RankRegions",
+          "PlanRoutes",
+          "CompareRoutes",
+          "TaskComplete"
+        ],
+        "visible_context": {
+          "needed_context": [
+            {
+              "handle": "question_1",
+              "kind": "question",
+              "summary": "question_1: Current natural-language question and schema handle.",
+              "source": "initial_input"
+            },
+            {
+              "handle": "work_1",
+              "kind": "work",
+              "summary": "prepared reusable work context `work_1`",
+              "evidence": {},
+              "source": "produced"
+            }
+          ],
+          "produced_context": [
+            {
+              "handle": "scene_1",
+              "kind": "scene",
+              "summary": "opened input as `scene_1`",
+              "evidence": {}
+            },
+            {
+              "handle": "work_1",
+              "kind": "work",
+              "summary": "prepared reusable work context `work_1`",
+              "evidence": {}
+            }
+          ]
+        },
+        "instruction": "Initial specialist handoff: use listed needs and prior artifacts only."
+      }
+    },
+    {
+      "turn": 16,
+      "role": "PA",
+      "phase": "ToolCall",
+      "step_id": "s2",
+      "thought": "The prepared work context contains the needed evidence; compute metrics {\"loss_area_ha_by_year\": true}.",
+      "output": {
+        "tool": "ComputeStats",
+        "args": {
+          "question": "question_1",
+          "work": "work_1",
+          "metrics": {
+            "loss_area_ha_by_year": true
+          },
+          "region": "aoi"
+        }
+      }
+    },
+    {
+      "turn": 17,
+      "role": "USER",
+      "phase": "ToolObservation",
+      "target": "PA",
+      "step_id": "s2",
+      "snap": {
+        "tool": "ComputeStats",
+        "status": "OK",
+        "summary": "computed statistics `stats_1`",
+        "produced_handle": "stats_1",
+        "evidence": {
+          "metrics": {
+            "forest_loss_history": true,
+            "loss_area_ha_by_year": true
+          },
+          "top_loss_years_ha": [
+            {
+              "year": "2016",
+              "area_ha": 201.04
+            },
+            {
+              "year": "2014",
+              "area_ha": 84.972
+            },
+            {
+              "year": "2018",
+              "area_ha": 77.557
+            },
+            {
+              "year": "2012",
+              "area_ha": 69.962
+            },
+            {
+              "year": "2017",
+              "area_ha": 67.639
+            }
+          ]
+        }
+      }
+    },
+    {
+      "turn": 18,
+      "role": "USER",
+      "phase": "SpecialistInput",
+      "target": "PA",
+      "step_id": "s2",
+      "snap": {
+        "contract": "PA contract for deterministic deforestation / multi year loss attribution: compute the requested statistic from prepared evidence. Report the value, units, and support fields needed by ORC.",
+        "needs": [
+          "question_1",
+          "work_1"
+        ],
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "done"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "running"
+          }
+        ],
+        "allowed_tools": [
+          "ComputeStats",
+          "CompareSources",
+          "DetectChange",
+          "ClassifyChange",
+          "ScoreHazard",
+          "EstimateExposure",
+          "RankRegions",
+          "PlanRoutes",
+          "CompareRoutes",
+          "TaskComplete"
+        ],
+        "visible_context": {
+          "needed_context": [
+            {
+              "handle": "question_1",
+              "kind": "question",
+              "summary": "question_1: Current natural-language question and schema handle.",
+              "source": "initial_input"
+            },
+            {
+              "handle": "work_1",
+              "kind": "work",
+              "summary": "prepared reusable work context `work_1`",
+              "evidence": {},
+              "source": "produced"
+            }
+          ],
+          "produced_context": [
+            {
+              "handle": "scene_1",
+              "kind": "scene",
+              "summary": "opened input as `scene_1`",
+              "evidence": {}
+            },
+            {
+              "handle": "work_1",
+              "kind": "work",
+              "summary": "prepared reusable work context `work_1`",
+              "evidence": {}
+            },
+            {
+              "handle": "stats_1",
+              "kind": "stats",
+              "summary": "computed statistics `stats_1`",
+              "evidence": {
+                "metrics": {
+                  "forest_loss_history": true,
+                  "loss_area_ha_by_year": true
+                },
+                "top_loss_years_ha": [
+                  {
+                    "year": "2016",
+                    "area_ha": 201.04
+                  },
+                  {
+                    "year": "2014",
+                    "area_ha": 84.972
+                  },
+                  {
+                    "year": "2018",
+                    "area_ha": 77.557
+                  },
+                  {
+                    "year": "2012",
+                    "area_ha": 69.962
+                  },
+                  {
+                    "year": "2017",
+                    "area_ha": 67.639
+                  }
+                ]
+              }
+            }
+          ],
+          "last_observation": {
+            "tool": "ComputeStats",
+            "status": "OK",
+            "summary": "computed statistics `stats_1`",
+            "produced_handle": "stats_1",
+            "evidence": {
+              "metrics": {
+                "forest_loss_history": true,
+                "loss_area_ha_by_year": true
+              },
+              "top_loss_years_ha": [
+                {
+                  "year": "2016",
+                  "area_ha": 201.04
+                },
+                {
+                  "year": "2014",
+                  "area_ha": 84.972
+                },
+                {
+                  "year": "2018",
+                  "area_ha": 77.557
+                },
+                {
+                  "year": "2012",
+                  "area_ha": 69.962
+                },
+                {
+                  "year": "2017",
+                  "area_ha": 67.639
+                }
+              ]
+            }
+          }
+        },
+        "instruction": "Continue from the latest tool observation; finish if the contract evidence is present."
+      }
+    },
+    {
+      "turn": 19,
+      "role": "PA",
+      "phase": "ToolCall",
+      "step_id": "s2",
+      "thought": "Change evidence is required; detect `largest_loss_year` over `2001_2023`.",
+      "output": {
+        "tool": "DetectChange",
+        "args": {
+          "question": "question_1",
+          "work": "stats_1",
+          "change": "largest_loss_year",
+          "window": "2001_2023"
+        }
+      }
+    },
+    {
+      "turn": 20,
+      "role": "USER",
+      "phase": "ToolObservation",
+      "target": "PA",
+      "step_id": "s2",
+      "snap": {
+        "tool": "DetectChange",
+        "status": "OK",
+        "summary": "detected change `change_1`",
+        "produced_handle": "change_1"
+      }
+    },
+    {
+      "turn": 21,
+      "role": "USER",
+      "phase": "SpecialistInput",
+      "target": "PA",
+      "step_id": "s2",
+      "snap": {
+        "contract": "PA contract for deterministic deforestation / multi year loss attribution: compute the requested statistic from prepared evidence. Report the value, units, and support fields needed by ORC.",
+        "needs": [
+          "question_1",
+          "work_1"
+        ],
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "done"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "running"
+          }
+        ],
+        "allowed_tools": [
+          "ComputeStats",
+          "CompareSources",
+          "DetectChange",
+          "ClassifyChange",
+          "ScoreHazard",
+          "EstimateExposure",
+          "RankRegions",
+          "PlanRoutes",
+          "CompareRoutes",
+          "TaskComplete"
+        ],
+        "visible_context": {
+          "needed_context": [
+            {
+              "handle": "question_1",
+              "kind": "question",
+              "summary": "question_1: Current natural-language question and schema handle.",
+              "source": "initial_input"
+            },
+            {
+              "handle": "work_1",
+              "kind": "work",
+              "summary": "prepared reusable work context `work_1`",
+              "evidence": {},
+              "source": "produced"
+            }
+          ],
+          "produced_context": [
+            {
+              "handle": "scene_1",
+              "kind": "scene",
+              "summary": "opened input as `scene_1`",
+              "evidence": {}
+            },
+            {
+              "handle": "work_1",
+              "kind": "work",
+              "summary": "prepared reusable work context `work_1`",
+              "evidence": {}
+            },
+            {
+              "handle": "stats_1",
+              "kind": "stats",
+              "summary": "computed statistics `stats_1`",
+              "evidence": {
+                "metrics": {
+                  "forest_loss_history": true,
+                  "loss_area_ha_by_year": true
+                },
+                "top_loss_years_ha": [
+                  {
+                    "year": "2016",
+                    "area_ha": 201.04
+                  },
+                  {
+                    "year": "2014",
+                    "area_ha": 84.972
+                  },
+                  {
+                    "year": "2018",
+                    "area_ha": 77.557
+                  },
+                  {
+                    "year": "2012",
+                    "area_ha": 69.962
+                  },
+                  {
+                    "year": "2017",
+                    "area_ha": 67.639
+                  }
+                ]
+              }
+            },
+            {
+              "handle": "change_1",
+              "kind": "change",
+              "summary": "detected change `change_1`",
+              "evidence": {}
+            }
+          ],
+          "last_observation": {
+            "tool": "DetectChange",
+            "status": "OK",
+            "summary": "detected change `change_1`",
+            "produced_handle": "change_1"
+          }
+        },
+        "instruction": "Continue from the latest tool observation; finish if the contract evidence is present."
+      }
+    },
+    {
+      "turn": 22,
+      "role": "PA",
+      "phase": "TaskComplete",
+      "step_id": "s2",
+      "thought": "The requested evidence is visible now; hand off a compact completion summary.",
+      "output": {
+        "tool": "TaskComplete",
+        "status": "TASK_COMPLETE",
+        "summary": "Contract complete: the requested statistic has been computed with units/support fields. Latest handle `change_1`; fields: change, window, year, loss_ha, loss_area_ha_by_year."
+      }
+    },
+    {
+      "turn": 23,
+      "role": "USER",
+      "phase": "DecisionContextToORC",
+      "target": "ORC",
+      "snap": {
+        "last_agent_report": {
+          "agent": "PA",
+          "step_id": "s2",
+          "status": "TASK_COMPLETE",
+          "summary": "Contract complete: the requested statistic has been computed with units/support fields. Latest handle `change_1`; fields: change, window, year, loss_ha, loss_area_ha_by_year."
+        },
+        "pending_step": null,
+        "plan_status": [
+          {
+            "id": "s1",
+            "agent": "GA",
+            "status": "done"
+          },
+          {
+            "id": "s2",
+            "agent": "PA",
+            "status": "done"
+          }
+        ],
+        "available_answer_refs": [
+          "ANSWER_JSON:answer_1"
+        ]
+      }
+    },
+    {
+      "turn": 24,
+      "role": "ORC",
+      "phase": "Terminate",
+      "output": {
+        "tool": "Terminate",
+        "answer_ref": "ANSWER_JSON:answer_1"
+      },
+      "reasoning_snap": "All delegated contracts are complete and the runtime has published the schema-valid answer reference."
+    }
+  ],
+  "final_answer_ref": "ANSWER_JSON:answer_1",
+  "resolved_final_answer": {
+    "loss_ha": 201.039833,
+    "year": 2016
+  },
+  "resolved_answer_sha256": "cbc090ae5b3fb15559fef5830865e1a4eedfd5ab1dfb3b99cd66e1663626ad8f",
+  "resolved_answer_provenance": "stored_worker_observations"
+}

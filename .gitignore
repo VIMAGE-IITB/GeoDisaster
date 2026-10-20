@@ -1,0 +1,112 @@
+# ---------------------------------------------------------------------------
+# GeoDisaster repository .gitignore
+# Keeps the repo clean: code + docs + small samples + figures are tracked;
+# the full dataset, model weights, run outputs, secrets and caches are not.
+# ---------------------------------------------------------------------------
+
+# --- Dataset: track only the README and the small representative samples. ---
+# The full dataset (data/*.jsonl and source_assets/, ~hundreds of MB to GBs)
+# lives on Hugging Face. If you download it into dataset/, it stays ignored.
+dataset/**
+!dataset/
+!dataset/README.md
+!dataset/samples/
+!dataset/samples/**
+
+# Large data / geospatial artifacts anywhere in the repo.
+*.jsonl
+*.tif
+*.tiff
+*.gpkg
+*.geojson
+*.nc
+*.h5
+*.hdf5
+*.parquet
+*.npz
+*.npy
+source_assets/
+data/
+
+# Source-only runtime helpers vendored from the GeoDisaster data generators.
+# These are small Python modules required by live tools; geospatial assets stay ignored.
+!data/
+!data/multi_hazard/
+!data/multi_hazard/mhds_common.py
+!data/multi_hazard/tools/
+!data/multi_hazard/tools/*.py
+!deforestation_data/
+!deforestation_data/tools/
+!deforestation_data/tools/tools.py
+!ourdata/
+!ourdata/final_routing_subset_v1/
+!ourdata/final_routing_subset_v1/tools/
+!ourdata/final_routing_subset_v1/tools/*.py
+!ourdata/sen1_hand_final_hidden_eval_5q/
+!ourdata/sen1_hand_final_hidden_eval_5q/scripts/
+!ourdata/sen1_hand_final_hidden_eval_5q/scripts/utils_sen1.py
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.ipynb_checkpoints/
+
+# --- Environments ---
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+.cache/
+.runtime/
+
+# --- Secrets and credentials (never commit) ---
+.secrets/
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+*_api_key*
+.openai_api_key*
+controller_addr.json
+
+# --- Run outputs, logs, evaluation artifacts ---
+runs/
+outputs/
+wandb/
+logs/
+*.log
+tool_outputs/
+tool_server_logs/
+final_dataset_gt_replay/tool_worker_artifacts/
+final_dataset_gt_replay/tool_worker_sessions/
+
+# --- Model weights and large archives ---
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.gguf
+*.ckpt
+*.onnx
+*.zip
+*.tar
+*.tar.gz
+*.7z
+checkpoints/
+adapters/
+
+# --- OS / editor cruft ---
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/

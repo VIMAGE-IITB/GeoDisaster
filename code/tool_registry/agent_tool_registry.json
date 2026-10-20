@@ -1,0 +1,268 @@
+{
+  "tools": [
+    {
+      "name": "ReadData",
+      "tags": [
+        "io",
+        "artifact"
+      ],
+      "signature": "ReadData(question: str, input: str, role?: 'pre_post'|'hansen'|'ndvi_nbr'|'vh'|'wildfire'|'deforestation'|'urban_expansion'|'drought'|'air_pollution'|'hospitals_and_schools'|'highways'|'nearest_highway'|'population_in_footprint'|'schools'|'population'|'post_disaster'|'buildings'|'target_classes'|'scene_a'|'scene_b'|'roads_shelters_flood'|'roads_shelters_flood_rgb'|'primary'|'known_water_reference', time?: 'event'|'event_window'|'pre_post_epochs'|'2001_2023', options?: dict)",
+      "description": "Open a named input handle for the current question, validate its local artifact paths, and return a scene handle containing the discovered raster/vector/image/report refs. The evaluator must initialize the session first with code/scripts/initialize_tool_session.py; case contents are not agent-visible tool arguments.",
+      "args": {
+        "question": "Question handle, usually question_1.",
+        "input": "Canonical input handle to open, such as hazard_stack_1 or sar_chip_1.",
+        "role": "Optional call role; a specific artifact-card role is authoritative.",
+        "time": "Optional temporal selector; a specific artifact-card time is authoritative.",
+        "options": "Optional data-selection hints such as source groups or bands."
+      }
+    },
+    {
+      "name": "PrepareScene",
+      "tags": [
+        "alignment",
+        "preprocess"
+      ],
+      "signature": "PrepareScene(question: str, inputs: dict, mode: 'forest'|'hazard'|'xbd_damage'|'sar_flood'|'routing'|'scene_compare'|'forest_change'|'forest_timeseries'|'forest_false_positive'|'baseline_canopy'|'forest_loss_history'|'forest_cross_modal'|'sar_change'|'wildfire_burn'|'forest_loss'|'built_up_gain'|'drought_anomaly'|'pollution_peak'|'multisource_hazard'|'wildfire_burn_exposure'|'forest_loss_exposure'|'built_up_gain_exposure'|'drought_anomaly_exposure'|'pollution_peak_exposure'|'xbd_grid'|'xbd_quadrants'|'xbd_scene_summary'|'flood_safe_routing'|'sar_flood_reference'|'sar_flood_diagnostic', checks?: dict)",
+      "description": "Build an aligned work context from one or more opened scene handles. It checks handle types and records the processing mode before downstream analytics.",
+      "args": {
+        "question": "Question handle.",
+        "inputs": "Mapping from semantic slot names to scene handles, for example {'hazard':'scene_1'}.",
+        "mode": "Supported preparation mode; task-specific names normalize to a guarded broad mode.",
+        "checks": "Optional required checks, such as grid size or spatial alignment requirements."
+      }
+    },
+    {
+      "name": "ComputeStats",
+      "tags": [
+        "stats"
+      ],
+      "signature": "ComputeStats(question: str, work: str, metrics: dict, region?: 'aoi'|'scene')",
+      "description": "Compute numeric statistics for a work/damage/hazard handle, including area, counts, means, z-scores, class histograms, or footprint summaries.",
+      "args": {
+        "question": "Question handle.",
+        "work": "Input work or analytic handle.",
+        "metrics": "Broad metric family requested by the question. Prefer canopy_cover, forest_loss_history, sar_change, hazard_area, vegetation_anomaly, pollution_peak, or damage_summary.",
+        "region": "Supported aggregation region."
+      }
+    },
+    {
+      "name": "MeasureArea",
+      "tags": [
+        "geometry",
+        "stats"
+      ],
+      "signature": "MeasureArea(question: str, work: str, target: 'forest_loss', unit: 'hectares')",
+      "description": "Measure area for extracted objects or masks in the requested units by reading the underlying raster/vector data referenced by the input handle.",
+      "args": {
+        "question": "Question handle.",
+        "work": "Input object/mask/work handle.",
+        "target": "Target class to measure.",
+        "unit": "Output unit."
+      }
+    },
+    {
+      "name": "CompareSources",
+      "tags": [
+        "agreement",
+        "multisource"
+      ],
+      "signature": "CompareSources(question: str, work: str, compare: dict)",
+      "description": "Compare multiple modalities or source layers, such as optical-vs-SAR, multi-source hazard agreement, or predicted-flood overlap versus pixels outside a known-water reference. Known-water context does not by itself establish temporal novelty.",
+      "args": {
+        "question": "Question handle.",
+        "work": "Input work or analytic handle.",
+        "compare": "Comparison specification: signals/sources/reference plus criterion."
+      }
+    },
+    {
+      "name": "DetectChange",
+      "tags": [
+        "temporal",
+        "change"
+      ],
+      "signature": "DetectChange(question: str, work: str, change: 'largest_loss_year'|'dominant_clearing_interval', window?: '2001_2023'|'pre_post_epochs')",
+      "description": "Detect or localize temporal change windows or dominant change events from a work handle.",
+      "args": {
+        "question": "Question handle.",
+        "work": "Input work/statistics handle.",
+        "change": "Change concept to detect.",
+        "window": "Temporal window to inspect."
+      }
+    },
+    {
+      "name": "ClassifyChange",
+      "tags": [
+        "classification"
+      ],
+      "signature": "ClassifyChange(question: str, work: str, labels: dict, rule: 'forest_loss'|'change_window'|'false_positive_type'|'canopy_density'|'concordance'|'cross_modal_concordance')",
+      "description": "Classify a change, canopy state, concordance state, or false-positive category using explicit labels/rules.",
+      "args": {
+        "question": "Question handle.",
+        "work": "Input work/change/statistics handle.",
+        "labels": "Allowed labels or thresholds.",
+        "rule": "Supported deforestation classification rule."
+      }
+    },
+    {
+      "name": "ScoreHazard",
+      "tags": [
+        "hazard",
+        "classification"
+      ],
+      "signature": "ScoreHazard(question: str, work: str, hazard: 'forest_disturbance'|'wildfire'|'deforestation'|'urban_expansion'|'drought'|'air_pollution'|'building_damage', scale: 'vh_delta_severity'|'question_defined_class'|'benchmark_relative_column_quartile'|'impact_footprint'|'spatial_concentration')",
+      "description": "Score hazard class, severity, concentration, or impact footprint from a prepared/analytic handle.",
+      "args": {
+        "question": "Question handle.",
+        "work": "Input work/statistics/damage handle.",
+        "hazard": "Hazard family to score.",
+        "scale": "Supported scoring scale."
+      }
+    },
+    {
+      "name": "EstimateExposure",
+      "tags": [
+        "exposure",
+        "impact"
+      ],
+      "signature": "EstimateExposure(question: str, work: str, exposure: 'blocked_roads'|'high_no2_column_population'|'highway_representatives_within_5km'|'nearest_highway'|'population_in_footprint'|'schools', metrics: dict)",
+      "description": "Estimate exposure of people/assets/roads/facilities to a hazard footprint or blocked-road layer.",
+      "args": {
+        "question": "Question handle.",
+        "work": "Input work handle.",
+        "exposure": "Supported exposure target.",
+        "metrics": "Requested exposure metrics."
+      }
+    },
+    {
+      "name": "AssessDamage",
+      "tags": [
+        "xbd",
+        "damage"
+      ],
+      "signature": "AssessDamage(question: str, work: str, aggregation: 'scene'|'grid_4x4'|'quadrant_2x2'|'severe_only'|'pair_compare', severity?: 'severe'|'major_or_destroyed')",
+      "description": "Aggregate building-damage polygons into scene, grid, quadrant, severe-only, or pair-comparison summaries.",
+      "args": {
+        "question": "Question handle.",
+        "work": "Input work/object handle.",
+        "aggregation": "Supported damage aggregation mode.",
+        "severity": "Optional severity filter, when required by the aggregation."
+      }
+    },
+    {
+      "name": "RankRegions",
+      "tags": [
+        "ranking",
+        "spatial"
+      ],
+      "signature": "RankRegions(question: str, work: str, by: 'severe_footprint_area_m2'|'severe_area_m2'|'severe_damage_count'|'severe_count'|'normalized_damage_severity'|'normalized_severity'|'severity_score'|'severity_score_normalized'|'flood_percentage'|'flood_pixels'|'flood_area', candidates: 'grid_4x4'|'quadrants_2x2', top_k?: int)",
+      "description": "Rank regions, components, grid cells, quadrants, or route candidates by the requested score.",
+      "args": {
+        "question": "Question handle.",
+        "work": "Input analytic handle.",
+        "by": "Supported ranking metric.",
+        "candidates": "Supported candidate set.",
+        "top_k": "Number of ranked entries to return."
+      }
+    },
+    {
+      "name": "CompareScenes",
+      "tags": [
+        "comparison"
+      ],
+      "signature": "CompareScenes(question: str, work: str, by: 'severe_damage_ratio_and_footprint')",
+      "description": "Compare two prepared scene summaries and decide which scene has the larger damage/risk signal.",
+      "args": {
+        "question": "Question handle.",
+        "work": "Pair-comparison damage/work handle.",
+        "by": "Comparison criterion."
+      }
+    },
+    {
+      "name": "ExtractObjects",
+      "tags": [
+        "segmentation",
+        "objects"
+      ],
+      "signature": "ExtractObjects(question: str, work: str, target: 'forest_loss_patches'|'severe_buildings'|'flood_polygons'|'flood_components', filters?: dict)",
+      "description": "Extract object sets such as forest-loss patches, severe buildings, flood polygons, or flood components. Sentinel flood polygons and components use 8-neighbour connectivity and produce validated run-scoped GeoJSON or label-raster artifacts.",
+      "args": {
+        "question": "Question handle.",
+        "work": "Input work/flood handle.",
+        "target": "Object target to extract.",
+        "filters": "Optional class/year/severity filters."
+      }
+    },
+    {
+      "name": "MapFlood",
+      "tags": [
+        "sar",
+        "flood"
+      ],
+      "signature": "MapFlood(question: str, work: str, method: 's1_min_backscatter_otsu_v1')",
+      "description": "Produce a run-scoped 0/1/255 candidate-flood mask from a prepared SAR scene. The published Sentinel contract supports the validated s1_min_backscatter_otsu_v1 method.",
+      "args": {
+        "question": "Question handle.",
+        "work": "Prepared SAR flood work handle.",
+        "method": "Validated flood mapping method."
+      }
+    },
+    {
+      "name": "DescribeFlood",
+      "tags": [
+        "sar",
+        "flood",
+        "report"
+      ],
+      "signature": "DescribeFlood(question: str, work: str, metrics: dict)",
+      "description": "Select and summarize requested flood-mask/component/polygon metrics, including exact-grid areas, centroids, 4x4 grids, and known-water overlap statistics from the causal handle.",
+      "args": {
+        "question": "Question handle.",
+        "work": "Flood/object handle.",
+        "metrics": "Requested flood metrics."
+      }
+    },
+    {
+      "name": "PlanRoutes",
+      "tags": [
+        "routing"
+      ],
+      "signature": "PlanRoutes(question: str, work: str, objective: 'nearest_reachable_shelter'|'candidate_routes'|'overlay_routes', avoid: dict)",
+      "description": "Recompute route metrics and composite edge costs from declared packaged geometry/road products, then select eligible fastest, safest-weighted, and balanced candidates; this worker does not run a new graph search.",
+      "args": {
+        "question": "Question handle.",
+        "work": "Prepared routing work handle.",
+        "objective": "Supported packaged route objective.",
+        "avoid": "Required packaged eligibility assertion: flood_affected_roads must be true."
+      }
+    },
+    {
+      "name": "CompareRoutes",
+      "tags": [
+        "routing",
+        "comparison"
+      ],
+      "signature": "CompareRoutes(question: str, work: str, prefer: dict)",
+      "description": "Compare requested validated fastest, safest-weighted, and balanced candidates and compute the full trade-off when all three are requested, without adding an evacuation recommendation.",
+      "args": {
+        "question": "Question handle.",
+        "work": "Routes handle.",
+        "prefer": "Boolean fastest/safest/balanced groups to include; at least one must be true."
+      }
+    },
+    {
+      "name": "RenderMap",
+      "tags": [
+        "visualization"
+      ],
+      "signature": "RenderMap(question: str, work: str, layers: dict, style: 'route_overlay'|'flood_diagnostic')",
+      "description": "Render a fresh run-scoped map/image artifact and validation manifest from the current analytical handle and exactly the requested declared layers; prepared answer overlays and unrequested context layers are not retrieved.",
+      "args": {
+        "question": "Question handle.",
+        "work": "Input map-ready handle.",
+        "layers": "Layer toggles to render.",
+        "style": "Supported rendering style."
+      }
+    }
+  ],
+  "terminal_action": "TaskComplete"
+}

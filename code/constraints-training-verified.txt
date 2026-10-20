@@ -1,0 +1,9 @@
+# Versions used by the verified GeoDisaster SFT/GRPO training environment.
+# Install a CUDA/CPU-appropriate torch build separately, then apply this file
+# as constraints rather than as a platform-specific lock.
+accelerate==1.10.0
+datasets==3.6.0
+huggingface-hub==0.34.3
+peft==0.17.1
+transformers==4.55.0
+trl==0.22.2

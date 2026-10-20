@@ -1,0 +1,48 @@
+{
+  "agent_tools": {
+    "GA": [
+      "ReadData",
+      "PrepareScene",
+      "MeasureArea",
+      "ExtractObjects",
+      "MapFlood",
+      "RenderMap"
+    ],
+    "PA": [
+      "ComputeStats",
+      "CompareSources",
+      "DetectChange",
+      "ClassifyChange",
+      "ScoreHazard",
+      "EstimateExposure",
+      "RankRegions",
+      "PlanRoutes",
+      "CompareRoutes"
+    ],
+    "VRA": [
+      "AssessDamage",
+      "DescribeFlood",
+      "CompareScenes"
+    ]
+  },
+  "tool_to_agent": {
+    "ReadData": "GA",
+    "PrepareScene": "GA",
+    "MeasureArea": "GA",
+    "ExtractObjects": "GA",
+    "MapFlood": "GA",
+    "RenderMap": "GA",
+    "ComputeStats": "PA",
+    "CompareSources": "PA",
+    "DetectChange": "PA",
+    "ClassifyChange": "PA",
+    "ScoreHazard": "PA",
+    "EstimateExposure": "PA",
+    "RankRegions": "PA",
+    "PlanRoutes": "PA",
+    "CompareRoutes": "PA",
+    "AssessDamage": "VRA",
+    "DescribeFlood": "VRA",
+    "CompareScenes": "VRA"
+  }
+}

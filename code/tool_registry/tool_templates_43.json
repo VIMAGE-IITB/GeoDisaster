@@ -1,0 +1,5337 @@
+{
+  "templates": [
+    {
+      "source": "deforestation_data",
+      "dataset": "deforestation_v2",
+      "question_type": "forest_loss_detection",
+      "count_in_final_dataset": 48,
+      "question": "Looking at the multi-temporal Sentinel-2 RGB panel for this AOI, decide whether real forest loss occurred between 2019-04-02 and 2019-09-29. Answer 'deforestation' or 'no_deforestation' and report the supporting NDVI drop, SAR VH change (dB), and Hansen loss area (ha).",
+      "initial_artifact_handles": [
+        "forest_loss_history_1",
+        "forest_mask_1",
+        "optical_stack_1",
+        "optical_timeseries_1",
+        "question_1",
+        "sar_stack_1",
+        "sar_timeseries_1"
+      ],
+      "expected_answer": "class label plus NDVI drop, SAR VH change, and Hansen loss area",
+      "eo_style_chain_length": 7,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "optical_stack_1",
+            "role": "pre_post",
+            "time": "event_window"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_stack_1",
+            "role": "pre_post",
+            "time": "event_window"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "forest_mask_1",
+            "role": "hansen"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "optical": "scene_1",
+              "sar": "scene_2",
+              "forest": "scene_3"
+            },
+            "mode": "forest_change"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "signals": "optical_sar_hansen",
+              "criterion": "forest_loss_support"
+            }
+          }
+        },
+        {
+          "tool": "ClassifyChange",
+          "args": {
+            "question": "question_1",
+            "work": "compare_1",
+            "labels": {
+              "positive": "deforestation",
+              "negative": "no_deforestation"
+            },
+            "rule": "forest_loss"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Answer deforestation/no_deforestation with NDVI drop, SAR VH change, and Hansen loss area."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "optical_stack_1",
+            "role": "pre_post",
+            "time": "event_window"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_stack_1",
+            "role": "pre_post",
+            "time": "event_window"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "forest_mask_1",
+            "role": "hansen"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "optical": "scene_1",
+              "sar": "scene_2",
+              "forest": "scene_3"
+            },
+            "mode": "forest_change"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "signals": "optical_sar_hansen",
+              "criterion": "forest_loss_support"
+            }
+          }
+        },
+        {
+          "tool": "ClassifyChange",
+          "args": {
+            "question": "question_1",
+            "work": "compare_1",
+            "labels": {
+              "positive": "deforestation",
+              "negative": "no_deforestation"
+            },
+            "rule": "forest_loss"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Answer deforestation/no_deforestation with NDVI drop, SAR VH change, and Hansen loss area."
+          }
+        }
+      ]
+    },
+    {
+      "source": "deforestation_data",
+      "dataset": "deforestation_v2",
+      "question_type": "area_estimation",
+      "count_in_final_dataset": 48,
+      "question": "Estimate the total deforested area in hectares inside this AOI for event year 2019. Use the Hansen GFC 2025 v1.13 loss-year mask, then validate the signal with NDVI/NBR drops in the same region.",
+      "initial_artifact_handles": [
+        "forest_loss_history_1",
+        "forest_mask_1",
+        "optical_stack_1",
+        "optical_timeseries_1",
+        "question_1",
+        "sar_stack_1",
+        "sar_timeseries_1"
+      ],
+      "expected_answer": "deforested area in hectares plus validation signal",
+      "eo_style_chain_length": 7,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "forest_mask_1",
+            "role": "hansen"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "optical_stack_1",
+            "role": "pre_post",
+            "time": "event_window"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "forest": "scene_1",
+              "optical": "scene_2"
+            },
+            "mode": "forest_change"
+          }
+        },
+        {
+          "tool": "ExtractObjects",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "target": "forest_loss_patches",
+            "filters": {
+              "event_year": "2019"
+            }
+          }
+        },
+        {
+          "tool": "MeasureArea",
+          "args": {
+            "question": "question_1",
+            "work": "objects_1",
+            "target": "forest_loss",
+            "unit": "hectares"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "signals": "ndvi_nbr_vs_hansen",
+              "criterion": "validation"
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report total deforested area in hectares and validation signal."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "forest_mask_1",
+            "role": "hansen"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "optical_stack_1",
+            "role": "pre_post",
+            "time": "event_window"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "forest": "scene_1",
+              "optical": "scene_2"
+            },
+            "mode": "forest_change"
+          }
+        },
+        {
+          "tool": "ExtractObjects",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "target": "forest_loss_patches",
+            "filters": {
+              "event_year": "2019"
+            }
+          }
+        },
+        {
+          "tool": "MeasureArea",
+          "args": {
+            "question": "question_1",
+            "work": "objects_1",
+            "target": "forest_loss",
+            "unit": "hectares"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "signals": "ndvi_nbr_vs_hansen",
+              "criterion": "validation"
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report total deforested area in hectares and validation signal."
+          }
+        }
+      ]
+    },
+    {
+      "source": "deforestation_data",
+      "dataset": "deforestation_v2",
+      "question_type": "change_window_estimation",
+      "count_in_final_dataset": 48,
+      "question": "Using AOI-wide means for the available Sentinel-2 epochs in canonical order (pre_3, pre_2, pre_1, post_1, post_2, post_3), identify the dominant adjacent clearing interval by maximizing NDVI_drop + 0.5*NBR_drop; skip any undeclared epoch. Return label deforestation and that interval only when Hansen event-year loss is at least 0.5 ha; otherwise return label no_deforestation and a null interval. Report Hansen loss area; the whole-period NDVI drop within positive event-year loss pixels, falling back to AOI-wide valid pixels when none exist; Sentinel-1 VH delta dB; and the selected-window NDVI drop, NBR drop, and composite score (the selected-window fields are null when the interval is null).",
+      "initial_artifact_handles": [
+        "forest_loss_history_1",
+        "forest_mask_1",
+        "optical_stack_1",
+        "optical_timeseries_1",
+        "question_1",
+        "sar_stack_1",
+        "sar_timeseries_1"
+      ],
+      "expected_answer": "start_epoch->end_epoch or null",
+      "eo_style_chain_length": 7,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "optical_timeseries_1",
+            "role": "ndvi_nbr",
+            "time": "pre_post_epochs"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_timeseries_1",
+            "role": "vh",
+            "time": "pre_post_epochs"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "forest_mask_1",
+            "role": "hansen"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "optical": "scene_1",
+              "sar": "scene_2",
+              "forest": "scene_3"
+            },
+            "mode": "forest_timeseries"
+          }
+        },
+        {
+          "tool": "DetectChange",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "change": "dominant_clearing_interval",
+            "window": "pre_post_epochs"
+          }
+        },
+        {
+          "tool": "ClassifyChange",
+          "args": {
+            "question": "question_1",
+            "work": "change_1",
+            "labels": {
+              "none": "null",
+              "changed": "start_epoch_to_end_epoch"
+            },
+            "rule": "change_window"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the Hansen-confirmed dominant adjacent clearing interval or null."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "optical_timeseries_1",
+            "role": "ndvi_nbr",
+            "time": "pre_post_epochs"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_timeseries_1",
+            "role": "vh",
+            "time": "pre_post_epochs"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "forest_mask_1",
+            "role": "hansen"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "optical": "scene_1",
+              "sar": "scene_2",
+              "forest": "scene_3"
+            },
+            "mode": "forest_timeseries"
+          }
+        },
+        {
+          "tool": "DetectChange",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "change": "dominant_clearing_interval",
+            "window": "pre_post_epochs"
+          }
+        },
+        {
+          "tool": "ClassifyChange",
+          "args": {
+            "question": "question_1",
+            "work": "change_1",
+            "labels": {
+              "none": "null",
+              "changed": "start_epoch_to_end_epoch"
+            },
+            "rule": "change_window"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the Hansen-confirmed dominant adjacent clearing interval or null."
+          }
+        }
+      ]
+    },
+    {
+      "source": "deforestation_data",
+      "dataset": "deforestation_v2",
+      "question_type": "false_positive_rejection",
+      "count_in_final_dataset": 48,
+      "question": "Apply the declared ordered remote-sensing proxy rules to classify the change pattern in this AOI. Return exactly one operational cause class from: deforestation, plantation_harvest, water_flood_edge, burn_bare_soil, agriculture, no_change. These are benchmark proxy classes, not independently field-verified causal labels. Report the optical NDVI/NBR drops, Sentinel-1 VH delta dB and post-event VV mean dB, Hansen loss area, baseline tree-cover mean percentage, and ordered rules fired.",
+      "initial_artifact_handles": [
+        "forest_loss_history_1",
+        "forest_mask_1",
+        "optical_stack_1",
+        "optical_timeseries_1",
+        "question_1",
+        "sar_stack_1",
+        "sar_timeseries_1"
+      ],
+      "expected_answer": "one cause label with cited optical/SAR/Hansen support",
+      "eo_style_chain_length": 7,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "optical_stack_1",
+            "role": "pre_post",
+            "time": "event_window"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_stack_1",
+            "role": "pre_post",
+            "time": "event_window"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "forest_mask_1",
+            "role": "hansen"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "optical": "scene_1",
+              "sar": "scene_2",
+              "forest": "scene_3"
+            },
+            "mode": "forest_false_positive"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "signals": "optical_sar_hansen",
+              "criterion": "cause_attribution"
+            }
+          }
+        },
+        {
+          "tool": "ClassifyChange",
+          "args": {
+            "question": "question_1",
+            "work": "compare_1",
+            "labels": {
+              "deforestation": true,
+              "plantation_harvest": true,
+              "water_flood_edge": true,
+              "burn_bare_soil": true,
+              "agriculture": true,
+              "no_change": true
+            },
+            "rule": "false_positive_type"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return exactly one ordered proxy cause with optical, SAR, and Hansen support."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "optical_stack_1",
+            "role": "pre_post",
+            "time": "event_window"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_stack_1",
+            "role": "pre_post",
+            "time": "event_window"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "forest_mask_1",
+            "role": "hansen"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "optical": "scene_1",
+              "sar": "scene_2",
+              "forest": "scene_3"
+            },
+            "mode": "forest_false_positive"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "signals": "optical_sar_hansen",
+              "criterion": "cause_attribution"
+            }
+          }
+        },
+        {
+          "tool": "ClassifyChange",
+          "args": {
+            "question": "question_1",
+            "work": "compare_1",
+            "labels": {
+              "deforestation": true,
+              "plantation_harvest": true,
+              "water_flood_edge": true,
+              "burn_bare_soil": true,
+              "agriculture": true,
+              "no_change": true
+            },
+            "rule": "false_positive_type"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return exactly one ordered proxy cause with optical, SAR, and Hansen support."
+          }
+        }
+      ]
+    },
+    {
+      "source": "deforestation_data",
+      "dataset": "deforestation_v2",
+      "question_type": "baseline_canopy_assessment",
+      "count_in_final_dataset": 48,
+      "question": "Compute the arithmetic mean Hansen treecover2000 percentage over all valid pixels in the packaged AOI raster (exclude non-finite values and declared nodata 255; treat zero as valid). Return dense_forest when the mean is >60%, open_canopy when 30% <= the mean <= 60%, or sparse when the mean is <30%. Report both the unrounded mean and the class.",
+      "initial_artifact_handles": [
+        "forest_loss_history_1",
+        "forest_mask_1",
+        "optical_stack_1",
+        "optical_timeseries_1",
+        "question_1",
+        "sar_stack_1",
+        "sar_timeseries_1"
+      ],
+      "expected_answer": "mean treecover percentage and canopy class",
+      "eo_style_chain_length": 5,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "forest_mask_1",
+            "role": "hansen"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "forest": "scene_1"
+            },
+            "mode": "baseline_canopy"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "metrics": {
+              "treecover_mean_pct": true
+            },
+            "region": "aoi"
+          }
+        },
+        {
+          "tool": "ClassifyChange",
+          "args": {
+            "question": "question_1",
+            "work": "stats_1",
+            "labels": {
+              "dense_forest": ">60",
+              "open_canopy": "30<=mean<=60",
+              "sparse": "<30"
+            },
+            "rule": "canopy_density"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the valid-pixel Hansen treecover2000 AOI mean and canopy class."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "forest_mask_1",
+            "role": "hansen"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "forest": "scene_1"
+            },
+            "mode": "baseline_canopy"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "metrics": {
+              "treecover_mean_pct": true
+            },
+            "region": "aoi"
+          }
+        },
+        {
+          "tool": "ClassifyChange",
+          "args": {
+            "question": "question_1",
+            "work": "stats_1",
+            "labels": {
+              "dense_forest": ">60",
+              "open_canopy": "30<=mean<=60",
+              "sparse": "<30"
+            },
+            "rule": "canopy_density"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the valid-pixel Hansen treecover2000 AOI mean and canopy class."
+          }
+        }
+      ]
+    },
+    {
+      "source": "deforestation_data",
+      "dataset": "deforestation_v2",
+      "question_type": "multi_year_loss_attribution",
+      "count_in_final_dataset": 48,
+      "question": "Using only Hansen lossyear codes 1 through 23 (calendar years 2001 through 2023) inside this AOI, compute each year's grid-aware loss area in hectares and return the year with the largest area plus that six-decimal area. Break an equal six-decimal area tie in favor of the earliest year. If no valid pixel has a code from 1 through 23, return year 'no_loss' and loss_ha 0.0. Code 0 is valid no-loss and nodata 255 is excluded.",
+      "initial_artifact_handles": [
+        "forest_loss_history_1",
+        "forest_mask_1",
+        "optical_stack_1",
+        "optical_timeseries_1",
+        "question_1",
+        "sar_stack_1",
+        "sar_timeseries_1"
+      ],
+      "expected_answer": "largest-loss year/no_loss and area",
+      "eo_style_chain_length": 5,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "forest_loss_history_1",
+            "role": "hansen",
+            "time": "2001_2023"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "loss_history": "scene_1"
+            },
+            "mode": "forest_loss_history"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "metrics": {
+              "loss_area_ha_by_year": true
+            },
+            "region": "aoi"
+          }
+        },
+        {
+          "tool": "DetectChange",
+          "args": {
+            "question": "question_1",
+            "work": "stats_1",
+            "change": "largest_loss_year",
+            "window": "2001_2023"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the six-decimal largest-loss area and its earliest equal-area year, or no_loss."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "forest_loss_history_1",
+            "role": "hansen",
+            "time": "2001_2023"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "loss_history": "scene_1"
+            },
+            "mode": "forest_loss_history"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "metrics": {
+              "loss_area_ha_by_year": true
+            },
+            "region": "aoi"
+          }
+        },
+        {
+          "tool": "DetectChange",
+          "args": {
+            "question": "question_1",
+            "work": "stats_1",
+            "change": "largest_loss_year",
+            "window": "2001_2023"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the six-decimal largest-loss area and its earliest equal-area year, or no_loss."
+          }
+        }
+      ]
+    },
+    {
+      "source": "deforestation_data",
+      "dataset": "deforestation_v2",
+      "question_type": "cross_modal_concordance",
+      "count_in_final_dataset": 48,
+      "question": "Compare whole-AOI optical and SAR signals using the available declared pre/post epochs. Define optical change as mean-pre minus mean-post NDVI drop > 0.10 and SAR change as mean-post minus mean-pre VH delta < -1.0 dB (equality at either threshold is no change for that modality). Return 'concordant' when both indicate change, 'discordant' when only one does, or 'no_change' when neither does. Report NDVI drop, contextual NBR drop, and VH delta dB.",
+      "initial_artifact_handles": [
+        "forest_loss_history_1",
+        "forest_mask_1",
+        "optical_stack_1",
+        "optical_timeseries_1",
+        "question_1",
+        "sar_stack_1",
+        "sar_timeseries_1"
+      ],
+      "expected_answer": "concordant/discordant/no_change plus numeric support",
+      "eo_style_chain_length": 6,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "optical_stack_1",
+            "role": "pre_post",
+            "time": "event_window"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_stack_1",
+            "role": "pre_post",
+            "time": "event_window"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "optical": "scene_1",
+              "sar": "scene_2"
+            },
+            "mode": "forest_cross_modal"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "signals": "ndvi_nbr_vs_vh",
+              "criterion": "concordance"
+            }
+          }
+        },
+        {
+          "tool": "ClassifyChange",
+          "args": {
+            "question": "question_1",
+            "work": "compare_1",
+            "labels": {
+              "concordant": true,
+              "discordant": true,
+              "no_change": true
+            },
+            "rule": "concordance"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the declared optical/SAR concordance class and finite numeric evidence."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "optical_stack_1",
+            "role": "pre_post",
+            "time": "event_window"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_stack_1",
+            "role": "pre_post",
+            "time": "event_window"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "optical": "scene_1",
+              "sar": "scene_2"
+            },
+            "mode": "forest_cross_modal"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "signals": "ndvi_nbr_vs_vh",
+              "criterion": "concordance"
+            }
+          }
+        },
+        {
+          "tool": "ClassifyChange",
+          "args": {
+            "question": "question_1",
+            "work": "compare_1",
+            "labels": {
+              "concordant": true,
+              "discordant": true,
+              "no_change": true
+            },
+            "rule": "concordance"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the declared optical/SAR concordance class and finite numeric evidence."
+          }
+        }
+      ]
+    },
+    {
+      "source": "deforestation_data",
+      "dataset": "deforestation_v2",
+      "question_type": "severity_proxy_numeric",
+      "count_in_final_dataset": 48,
+      "question": "Using all available Sentinel-1 acquisitions and their declared pre/post temporal roles, compute the whole-AOI mean VH backscatter change as post_mean_db minus pre_mean_db. Return that finite delta in decibels and bucket severity as severe for delta < -3, moderate for -3 <= delta < -1, mild for -1 <= delta < 0, or none for delta >= 0. Thus -3 is moderate, -1 is mild, and 0 is none.",
+      "initial_artifact_handles": [
+        "forest_loss_history_1",
+        "forest_mask_1",
+        "optical_stack_1",
+        "optical_timeseries_1",
+        "question_1",
+        "sar_stack_1",
+        "sar_timeseries_1"
+      ],
+      "expected_answer": "VH delta dB and severity bucket",
+      "eo_style_chain_length": 5,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_stack_1",
+            "role": "pre_post",
+            "time": "event_window"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "sar": "scene_1"
+            },
+            "mode": "sar_change"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "metrics": {
+              "vh_delta_db": true
+            },
+            "region": "aoi"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "stats_1",
+            "hazard": "forest_disturbance",
+            "scale": "vh_delta_severity"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the finite declared-window VH delta dB and its threshold bucket."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_stack_1",
+            "role": "pre_post",
+            "time": "event_window"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "sar": "scene_1"
+            },
+            "mode": "sar_change"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "metrics": {
+              "vh_delta_db": true
+            },
+            "region": "aoi"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "stats_1",
+            "hazard": "forest_disturbance",
+            "scale": "vh_delta_severity"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the finite declared-window VH delta dB and its threshold bucket."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "wildfire:A",
+      "count_in_final_dataset": 15,
+      "question": "Using the declared binary MODIS MCD64A1 event burned-area mask, compute the burned area for this AOI in hectares. Exclude non-finite and declared nodata pixels, treat mask value 1 as burned and 0 as valid unburned, sum grid-aware WGS84 ellipsoidal cell areas, and report the result rounded to three decimal places.",
+      "initial_artifact_handles": [
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "requested numeric hazard metric",
+      "eo_style_chain_length": 4,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "wildfire",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "wildfire_burn"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "metrics": {
+              "burned_area": true
+            },
+            "region": "aoi"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the three-decimal MCD64A1 burned area in hectares with source evidence."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "wildfire",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "wildfire_burn"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "metrics": {
+              "burned_area": true
+            },
+            "region": "aoi"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the three-decimal MCD64A1 burned area in hectares with source evidence."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "wildfire:B",
+      "count_in_final_dataset": 15,
+      "question": "Inside the declared binary MODIS MCD64A1 burn footprint, classify every valid Sentinel-2 dNBR pixel as unburned (<0.10), low (0.10 <= dNBR < 0.27), moderate (0.27 <= dNBR < 0.44), or high (dNBR >= 0.44). Return the dominant class, its fraction of all valid dNBR pixels inside the footprint, the per-class pixel counts/grid-aware areas/means, the analysis scope, and footprint pixel count. Break an equal-count tie by the declared order: unburned, low, moderate, high.",
+      "initial_artifact_handles": [
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "dominant severity/class label",
+      "eo_style_chain_length": 4,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "wildfire",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "wildfire_burn"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "wildfire",
+            "scale": "question_defined_class"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the dominant masked dNBR class, fraction, and complete class evidence."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "wildfire",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "wildfire_burn"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "wildfire",
+            "scale": "question_defined_class"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the dominant masked dNBR class, fraction, and complete class evidence."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "wildfire:C",
+      "count_in_final_dataset": 15,
+      "question": "Compare the declared binary MODIS MCD64A1 burn mask, fixed-threshold Sentinel-2 dNBR burn-support mask, and NIFC incident-perimeter mask. Compute each grid-aware area and each pair's symmetric absolute percent difference, defined as |A-B| / ((A+B)/2) * 100 (0 when both are zero). Use the median of the three pairwise differences: the sources agree when it is <=20.0%. Return the decision, median area, median percent difference, bounded score max(0, 100-median difference), all source areas, and the pairwise percent-difference/IoU/state-agreement/kappa evidence.",
+      "initial_artifact_handles": [
+        "agreement_sources_1",
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "source agreement decision with per-source support",
+      "eo_style_chain_length": 5,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "wildfire",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "agreement_sources_1",
+            "role": "wildfire",
+            "options": {
+              "sources": "all"
+            }
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "sources": "scene_2"
+            },
+            "mode": "multisource_hazard"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "sources": "all",
+              "criterion": "area_agreement",
+              "maximum_median_pct_delta": 20.0
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the declared area-agreement decision and complete source/pairwise evidence."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "wildfire",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "agreement_sources_1",
+            "role": "wildfire",
+            "options": {
+              "sources": "all"
+            }
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "sources": "scene_2"
+            },
+            "mode": "multisource_hazard"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "sources": "all",
+              "criterion": "area_agreement",
+              "maximum_median_pct_delta": 20.0
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the declared area-agreement decision and complete source/pairwise evidence."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "wildfire:D",
+      "count_in_final_dataset": 15,
+      "question": "Using the declared binary MCD64A1 burn footprint and cached OSM highway features, count the distinct feature representative points whose exact GeoJSON geometry is within an inclusive 5,000 m of the nearest burn-mask cell center. Use a local azimuthal-equidistant metric projection; do not use cached row/column hints. Return the count plus the footprint area, WorldPop footprint sum, in-footprint count, nearest representative, distance method, and geometry contract.",
+      "initial_artifact_handles": [
+        "exposure_layers_1",
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "exposure/distance/count requested by the question",
+      "eo_style_chain_length": 6,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "wildfire",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "exposure_layers_1",
+            "role": "highways"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "exposure": "scene_2"
+            },
+            "mode": "wildfire_burn_exposure"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "wildfire",
+            "scale": "impact_footprint"
+          }
+        },
+        {
+          "tool": "EstimateExposure",
+          "args": {
+            "question": "question_1",
+            "work": "score_1",
+            "exposure": "highway_representatives_within_5km",
+            "metrics": {
+              "within_km": 5
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the 5 km highway-representative count and complete geospatial evidence."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "wildfire",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "exposure_layers_1",
+            "role": "highways"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "exposure": "scene_2"
+            },
+            "mode": "wildfire_burn_exposure"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "wildfire",
+            "scale": "impact_footprint"
+          }
+        },
+        {
+          "tool": "EstimateExposure",
+          "args": {
+            "question": "question_1",
+            "work": "score_1",
+            "exposure": "highway_representatives_within_5km",
+            "metrics": {
+              "within_km": 5
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the 5 km highway-representative count and complete geospatial evidence."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "deforestation:A",
+      "count_in_final_dataset": 23,
+      "question": "Using the declared binary Hansen Global Forest Change event mask, compute the AOI area whose loss year equals 2022. Treat finite value 1 as 2022 loss and 0 as valid no-2022-loss, exclude declared nodata, sum grid-aware WGS84 ellipsoidal cell areas, and report hectares rounded to three decimals.",
+      "initial_artifact_handles": [
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "requested numeric hazard metric",
+      "eo_style_chain_length": 4,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "deforestation",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "forest_loss"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "metrics": {
+              "forest_loss": true
+            },
+            "region": "aoi"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the three-decimal Hansen 2022 forest-loss area in hectares with source evidence."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "deforestation",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "forest_loss"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "metrics": {
+              "forest_loss": true
+            },
+            "region": "aoi"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the three-decimal Hansen 2022 forest-loss area in hectares with source evidence."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "deforestation:B",
+      "count_in_final_dataset": 23,
+      "question": "Inside the declared binary Hansen 2022 loss footprint, classify every finite Sentinel-2 NDVI drop (pre minus post) using half-open bins: none [-10,0.15), minor [0.15,0.30), major [0.30,0.50), and severe [0.50,10). Return the pixel-count-dominant class and its fraction; break an exact tie by the stated class order.",
+      "initial_artifact_handles": [
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "dominant severity/class label",
+      "eo_style_chain_length": 4,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "deforestation",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "forest_loss"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "deforestation",
+            "scale": "question_defined_class"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the dominant Hansen-masked Sentinel-2 NDVI-drop class and fraction."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "deforestation",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "forest_loss"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "deforestation",
+            "scale": "question_defined_class"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the dominant Hansen-masked Sentinel-2 NDVI-drop class and fraction."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "deforestation:C",
+      "count_in_final_dataset": 23,
+      "question": "Compare the declared Hansen 2022 loss mask, JRC TMF 2022 annual-loss mask, and RADD 2022-06-01 through 2022-09-30 alert mask (low or high confidence). Compute grid-aware source areas and symmetric pairwise differences |A-B|/((A+B)/2)*100, using 0 when both areas are zero. The sources agree when the median of the three differences is <=25.0%. Return the decision, bounded score max(0,100-median), all source areas, and pairwise percent/IoU/state-agreement/kappa evidence.",
+      "initial_artifact_handles": [
+        "agreement_sources_1",
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "source agreement decision with per-source support",
+      "eo_style_chain_length": 5,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "deforestation",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "agreement_sources_1",
+            "role": "deforestation",
+            "options": {
+              "sources": "all"
+            }
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "sources": "scene_2"
+            },
+            "mode": "multisource_hazard"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "sources": "all",
+              "criterion": "area_agreement",
+              "maximum_median_pct_delta": 25.0
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the area-agreement decision and complete source/pairwise evidence."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "deforestation",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "agreement_sources_1",
+            "role": "deforestation",
+            "options": {
+              "sources": "all"
+            }
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "sources": "scene_2"
+            },
+            "mode": "multisource_hazard"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "sources": "all",
+              "criterion": "area_agreement",
+              "maximum_median_pct_delta": 25.0
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the area-agreement decision and complete source/pairwise evidence."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "deforestation:D",
+      "count_in_final_dataset": 23,
+      "question": "Using the declared binary Hansen 2022 forest-loss footprint and cached OSM highway features, find the nearest distinct feature representative point to any positive loss-raster cell center in a local azimuthal-equidistant metric projection. Use exact GeoJSON geometry, not cached row/column hints. Return the distance or an explicit null when no highway representative is cached, plus the 5,000 m context count, in-footprint count, nearest name, footprint area, and WorldPop footprint sum.",
+      "initial_artifact_handles": [
+        "exposure_layers_1",
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "exposure/distance/count requested by the question",
+      "eo_style_chain_length": 6,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "deforestation",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "exposure_layers_1",
+            "role": "nearest_highway"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "exposure": "scene_2"
+            },
+            "mode": "forest_loss_exposure"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "deforestation",
+            "scale": "impact_footprint"
+          }
+        },
+        {
+          "tool": "EstimateExposure",
+          "args": {
+            "question": "question_1",
+            "work": "score_1",
+            "exposure": "nearest_highway",
+            "metrics": {
+              "distance_to": "nearest_highway"
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the nearest-highway result and complete declared geospatial evidence."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "deforestation",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "exposure_layers_1",
+            "role": "nearest_highway"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "exposure": "scene_2"
+            },
+            "mode": "forest_loss_exposure"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "deforestation",
+            "scale": "impact_footprint"
+          }
+        },
+        {
+          "tool": "EstimateExposure",
+          "args": {
+            "question": "question_1",
+            "work": "score_1",
+            "exposure": "nearest_highway",
+            "metrics": {
+              "distance_to": "nearest_highway"
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the nearest-highway result and complete declared geospatial evidence."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "urban_expansion:A",
+      "count_in_final_dataset": 29,
+      "question": "Using the declared binary Dynamic World built-probability gain mask, compute new built-up area between the 2019 and 2024 annual composites. A gain pixel has 2024 built probability >0.55 and 2019 built probability <=0.55. Sum exact grid-cell areas and return hectares with the source handle.",
+      "initial_artifact_handles": [
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "requested numeric hazard metric",
+      "eo_style_chain_length": 4,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "urban_expansion",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "built_up_gain"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "metrics": {
+              "built_up_gain": true
+            },
+            "region": "aoi"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the Dynamic World built-gain area and source handle."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "urban_expansion",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "built_up_gain"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "metrics": {
+              "built_up_gain": true
+            },
+            "region": "aoi"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the Dynamic World built-gain area and source handle."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "urban_expansion:B",
+      "count_in_final_dataset": 29,
+      "question": "Classify every finite whole-AOI Sentinel-2 NDBI change pixel (2024 minus 2019). Use contraction [-10,-0.02), stable [-0.02,0.02), minor [0.02,0.18), and major [0.18,10). Return the pixel-count-dominant class, its fraction, and complete per-class pixel/area/mean evidence; ties follow the declared class order.",
+      "initial_artifact_handles": [
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "dominant severity/class label",
+      "eo_style_chain_length": 4,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "urban_expansion",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "built_up_gain"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "urban_expansion",
+            "scale": "question_defined_class"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the dominant urban_expansion class."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "urban_expansion",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "built_up_gain"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "urban_expansion",
+            "scale": "question_defined_class"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the dominant urban_expansion class."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "urban_expansion:C",
+      "count_in_final_dataset": 29,
+      "question": "Compare source-native built-gain masks from Dynamic World 2019-2024, GHSL 2020-2025, and ESA WorldCover 2020-2021. Compute exact source areas and symmetric pairwise differences abs(A-B)/((A+B)/2)*100 (zero when both areas are zero). Sources agree when the median difference is <=30%. Return the decision, bounded max(0,100-median) score, all source areas, and pairwise percent/IoU/state-agreement/kappa evidence.",
+      "initial_artifact_handles": [
+        "agreement_sources_1",
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "source agreement decision with per-source support",
+      "eo_style_chain_length": 5,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "urban_expansion",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "agreement_sources_1",
+            "role": "urban_expansion",
+            "options": {
+              "sources": "all"
+            }
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "sources": "scene_2"
+            },
+            "mode": "multisource_hazard"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "sources": "all",
+              "criterion": "area_agreement",
+              "maximum_median_pct_delta": 30.0
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Answer whether the named sources agree and cite the source values."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "urban_expansion",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "agreement_sources_1",
+            "role": "urban_expansion",
+            "options": {
+              "sources": "all"
+            }
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "sources": "scene_2"
+            },
+            "mode": "multisource_hazard"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "sources": "all",
+              "criterion": "area_agreement",
+              "maximum_median_pct_delta": 30.0
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Answer whether the named sources agree and cite the source values."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "urban_expansion:D",
+      "count_in_final_dataset": 29,
+      "question": "Using the declared binary Dynamic World 2019-2024 built-gain footprint, sum the co-registered WorldPop 2020 people-per-pixel values inside positive gain cells. Return that population count plus footprint area, source label, and cached hospital/school representative-point context. This is population located in the footprint at the WorldPop reference epoch, not population growth caused by expansion.",
+      "initial_artifact_handles": [
+        "exposure_layers_1",
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "exposure/distance/count requested by the question",
+      "eo_style_chain_length": 6,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "urban_expansion",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "exposure_layers_1",
+            "role": "population_in_footprint"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "exposure": "scene_2"
+            },
+            "mode": "built_up_gain_exposure"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "urban_expansion",
+            "scale": "impact_footprint"
+          }
+        },
+        {
+          "tool": "EstimateExposure",
+          "args": {
+            "question": "question_1",
+            "work": "score_1",
+            "exposure": "population_in_footprint",
+            "metrics": {
+              "summary": true
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return WorldPop population in the built-gain footprint and declared context evidence."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "urban_expansion",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "exposure_layers_1",
+            "role": "population_in_footprint"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "exposure": "scene_2"
+            },
+            "mode": "built_up_gain_exposure"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "urban_expansion",
+            "scale": "impact_footprint"
+          }
+        },
+        {
+          "tool": "EstimateExposure",
+          "args": {
+            "question": "question_1",
+            "work": "score_1",
+            "exposure": "population_in_footprint",
+            "metrics": {
+              "summary": true
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return WorldPop population in the built-gain footprint and declared context evidence."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "drought:A",
+      "count_in_final_dataset": 21,
+      "question": "What is the AOI-mean MODIS NDVI z-score for California Central Valley drought AOI 30 on 2024-08-15, using finite pixels in the declared target raster and the six declared same-season historical baseline observations?",
+      "initial_artifact_handles": [
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "requested numeric hazard metric",
+      "eo_style_chain_length": 4,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "drought",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "drought_anomaly"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "metrics": {
+              "ndvi_z_score": true
+            },
+            "region": "aoi"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the ndvi_z_score requested for the drought case."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "drought",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "drought_anomaly"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "metrics": {
+              "ndvi_z_score": true
+            },
+            "region": "aoi"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the ndvi_z_score requested for the drought case."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "drought:B",
+      "count_in_final_dataset": 21,
+      "question": "What is the dominant train-relative CHIRPS SPI pixel quartile over California Central Valley drought AOI 30 on 2024-08-15?",
+      "initial_artifact_handles": [
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "dominant severity/class label",
+      "eo_style_chain_length": 4,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "drought",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "drought_anomaly"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "drought",
+            "scale": "question_defined_class"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the dominant drought class."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "drought",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "drought_anomaly"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "drought",
+            "scale": "question_defined_class"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the dominant drought class."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "drought:C",
+      "count_in_final_dataset": 21,
+      "question": "Do the train-relative bottom-quartile CHIRPS SPI, MODIS NDVI, and ERA5 soil-moisture stress masks reach median pairwise IoU 0.30 for California Central Valley drought AOI 30?",
+      "initial_artifact_handles": [
+        "agreement_sources_1",
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "source agreement decision with per-source support",
+      "eo_style_chain_length": 5,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "drought",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "agreement_sources_1",
+            "role": "drought",
+            "options": {
+              "sources": "all"
+            }
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "sources": "scene_2"
+            },
+            "mode": "multisource_hazard"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "sources": "all",
+              "criterion": "iou",
+              "minimum_iou": 0.3,
+              "threshold_contract": "per_source_train_pixel_q25_v1",
+              "normalization_fit_split": "train"
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Answer whether the named sources agree and cite the source values."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "drought",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "agreement_sources_1",
+            "role": "drought",
+            "options": {
+              "sources": "all"
+            }
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "sources": "scene_2"
+            },
+            "mode": "multisource_hazard"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "sources": "all",
+              "criterion": "iou",
+              "minimum_iou": 0.3,
+              "threshold_contract": "per_source_train_pixel_q25_v1",
+              "normalization_fit_split": "train"
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Answer whether the named sources agree and cite the source values."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "drought:D",
+      "count_in_final_dataset": 21,
+      "question": "How many schools are inside the train-relative bottom-quartile CHIRPS SPI footprint for California Central Valley drought AOI 30?",
+      "initial_artifact_handles": [
+        "exposure_layers_1",
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "exposure/distance/count requested by the question",
+      "eo_style_chain_length": 6,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "drought",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "exposure_layers_1",
+            "role": "schools"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "exposure": "scene_2"
+            },
+            "mode": "drought_anomaly_exposure"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "drought",
+            "scale": "impact_footprint"
+          }
+        },
+        {
+          "tool": "EstimateExposure",
+          "args": {
+            "question": "question_1",
+            "work": "score_1",
+            "exposure": "schools",
+            "metrics": {
+              "summary": true
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the requested exposure/distance/count."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "drought",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "exposure_layers_1",
+            "role": "schools"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "exposure": "scene_2"
+            },
+            "mode": "drought_anomaly_exposure"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "drought",
+            "scale": "impact_footprint"
+          }
+        },
+        {
+          "tool": "EstimateExposure",
+          "args": {
+            "question": "question_1",
+            "work": "score_1",
+            "exposure": "schools",
+            "metrics": {
+              "summary": true
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the requested exposure/distance/count."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "air_pollution:A",
+      "count_in_final_dataset": 20,
+      "question": "What is the peak Sentinel-5P NO2 column during Los Angeles pollution episode AOI 30?",
+      "initial_artifact_handles": [
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "requested numeric hazard metric",
+      "eo_style_chain_length": 4,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "air_pollution",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "pollution_peak"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "metrics": {
+              "peak_no2_column": true
+            },
+            "region": "aoi"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the peak_no2_column requested for the air_pollution case."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "air_pollution",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "pollution_peak"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "metrics": {
+              "peak_no2_column": true
+            },
+            "region": "aoi"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the peak_no2_column requested for the air_pollution case."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "air_pollution:B",
+      "count_in_final_dataset": 20,
+      "question": "What is the training-relative S5P NO2-column quartile class at the peak for Los Angeles pollution episode AOI 30?",
+      "initial_artifact_handles": [
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "dominant severity/class label",
+      "eo_style_chain_length": 4,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "air_pollution",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "pollution_peak"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "air_pollution",
+            "scale": "benchmark_relative_column_quartile"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the dominant air_pollution class."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "air_pollution",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1"
+            },
+            "mode": "pollution_peak"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "air_pollution",
+            "scale": "benchmark_relative_column_quartile"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the dominant air_pollution class."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "air_pollution:C",
+      "count_in_final_dataset": 20,
+      "question": "Do Sentinel-5P NO2, CAMS NO2, and MODIS AOD agree on the training-relative episode-intensity state for Los Angeles pollution episode AOI 30?",
+      "initial_artifact_handles": [
+        "agreement_sources_1",
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "source agreement decision with per-source support",
+      "eo_style_chain_length": 5,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "air_pollution",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "agreement_sources_1",
+            "role": "air_pollution",
+            "options": {
+              "sources": "all"
+            }
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "sources": "scene_2"
+            },
+            "mode": "multisource_hazard"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "sources": "all",
+              "criterion": "benchmark_relative_intensity_agreement",
+              "required_agreement_fraction": 1.0,
+              "normalization_fit_split": "train"
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Answer whether the named sources agree and cite the source values."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "air_pollution",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "agreement_sources_1",
+            "role": "air_pollution",
+            "options": {
+              "sources": "all"
+            }
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "sources": "scene_2"
+            },
+            "mode": "multisource_hazard"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "compare": {
+              "sources": "all",
+              "criterion": "benchmark_relative_intensity_agreement",
+              "required_agreement_fraction": 1.0,
+              "normalization_fit_split": "train"
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Answer whether the named sources agree and cite the source values."
+          }
+        }
+      ]
+    },
+    {
+      "source": "data/multi_hazard",
+      "dataset": "multi_hazard",
+      "question_type": "air_pollution:D",
+      "count_in_final_dataset": 20,
+      "question": "What population is located within the training-defined top-quartile S5P NO2-column footprint during Los Angeles pollution episode AOI 30?",
+      "initial_artifact_handles": [
+        "exposure_layers_1",
+        "hazard_stack_1",
+        "question_1"
+      ],
+      "expected_answer": "exposure/distance/count requested by the question",
+      "eo_style_chain_length": 6,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "air_pollution",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "exposure_layers_1",
+            "role": "population"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "exposure": "scene_2"
+            },
+            "mode": "pollution_peak_exposure"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "air_pollution",
+            "scale": "impact_footprint"
+          }
+        },
+        {
+          "tool": "EstimateExposure",
+          "args": {
+            "question": "question_1",
+            "work": "score_1",
+            "exposure": "high_no2_column_population",
+            "metrics": {
+              "summary": true
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the requested exposure/distance/count."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "hazard_stack_1",
+            "role": "air_pollution",
+            "time": "event"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "exposure_layers_1",
+            "role": "population"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "hazard": "scene_1",
+              "exposure": "scene_2"
+            },
+            "mode": "pollution_peak_exposure"
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "hazard": "air_pollution",
+            "scale": "impact_footprint"
+          }
+        },
+        {
+          "tool": "EstimateExposure",
+          "args": {
+            "question": "question_1",
+            "work": "score_1",
+            "exposure": "high_no2_column_population",
+            "metrics": {
+              "summary": true
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the requested exposure/distance/count."
+          }
+        }
+      ]
+    },
+    {
+      "source": "geodisaster",
+      "dataset": "xbd_damage_qa_valid_assets",
+      "question_type": "XBD-Q1",
+      "count_in_final_dataset": 177,
+      "question": "A post-disaster satellite scene from a flooding event (hurricane-florence) has been captured. From the declared building-damage polygons, report counts by class, damaged and severe percentages over classified buildings only, and total severe-building footprint area in square metres.",
+      "initial_artifact_handles": [
+        "damage_labels_1",
+        "image_1",
+        "question_1"
+      ],
+      "expected_answer": "scene-level damage inventory",
+      "eo_style_chain_length": 6,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "image_1",
+            "role": "post_disaster"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "damage_labels_1",
+            "role": "buildings"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "image": "scene_1",
+              "labels": "scene_2"
+            },
+            "mode": "xbd_damage"
+          }
+        },
+        {
+          "tool": "AssessDamage",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "aggregation": "scene"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "damage_1",
+            "metrics": {
+              "building_count_by_damage": true,
+              "severe_ratio": true,
+              "footprint_area": true
+            },
+            "region": "scene"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Generate the complete scene-level damage inventory."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "image_1",
+            "role": "post_disaster"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "damage_labels_1",
+            "role": "buildings"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "image": "scene_1",
+              "labels": "scene_2"
+            },
+            "mode": "xbd_damage"
+          }
+        },
+        {
+          "tool": "AssessDamage",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "aggregation": "scene"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "damage_1",
+            "metrics": {
+              "building_count_by_damage": true,
+              "severe_ratio": true,
+              "footprint_area": true
+            },
+            "region": "scene"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Generate the complete scene-level damage inventory."
+          }
+        }
+      ]
+    },
+    {
+      "source": "geodisaster",
+      "dataset": "xbd_damage_qa_valid_assets",
+      "question_type": "XBD-Q2",
+      "count_in_final_dataset": 177,
+      "question": "For this post-disaster flooding scene (hurricane-florence), divide the 1024×1024 frame into Q0–Q3. Rank quadrants by severe polygon area clipped to each quadrant; assign each severe-building count to its centroid quadrant. Report the ascending-ID representative of the maximum-area tie, its centroid count, and its clipped footprint area.",
+      "initial_artifact_handles": [
+        "damage_labels_1",
+        "image_1",
+        "question_1"
+      ],
+      "expected_answer": "highest severe-damage quadrant",
+      "eo_style_chain_length": 6,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "image_1",
+            "role": "post_disaster"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "damage_labels_1",
+            "role": "buildings"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "image": "scene_1",
+              "labels": "scene_2"
+            },
+            "mode": "xbd_quadrants",
+            "checks": {
+              "grid": "2x2"
+            }
+          }
+        },
+        {
+          "tool": "AssessDamage",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "aggregation": "quadrant_2x2",
+            "severity": "severe"
+          }
+        },
+        {
+          "tool": "RankRegions",
+          "args": {
+            "question": "question_1",
+            "work": "damage_1",
+            "by": "severe_footprint_area_m2",
+            "candidates": "quadrants_2x2",
+            "top_k": 1
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the quadrant with maximum severe-damage footprint area; break exact ties by ascending quadrant ID."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "image_1",
+            "role": "post_disaster"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "damage_labels_1",
+            "role": "buildings"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "image": "scene_1",
+              "labels": "scene_2"
+            },
+            "mode": "xbd_quadrants",
+            "checks": {
+              "grid": "2x2"
+            }
+          }
+        },
+        {
+          "tool": "AssessDamage",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "aggregation": "quadrant_2x2",
+            "severity": "severe"
+          }
+        },
+        {
+          "tool": "RankRegions",
+          "args": {
+            "question": "question_1",
+            "work": "damage_1",
+            "by": "severe_footprint_area_m2",
+            "candidates": "quadrants_2x2",
+            "top_k": 1
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the quadrant with maximum severe-damage footprint area; break exact ties by ascending quadrant ID."
+          }
+        }
+      ]
+    },
+    {
+      "source": "geodisaster",
+      "dataset": "xbd_damage_qa_valid_assets",
+      "question_type": "XBD-Q3",
+      "count_in_final_dataset": 177,
+      "question": "On the 4×4 grid, rank cells containing at least one classified building by the exact score (minor + 2×major + 3×destroyed)/(3×classified). Exclude unclassified buildings from the denominator and cells with no classified buildings from ranking. Report the ascending-ID representative and all exact top ties.",
+      "initial_artifact_handles": [
+        "damage_labels_1",
+        "image_1",
+        "question_1"
+      ],
+      "expected_answer": "ranked 4x4 damage grid cells",
+      "eo_style_chain_length": 6,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "image_1",
+            "role": "post_disaster"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "damage_labels_1",
+            "role": "buildings"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "image": "scene_1",
+              "labels": "scene_2"
+            },
+            "mode": "xbd_grid",
+            "checks": {
+              "grid": "4x4"
+            }
+          }
+        },
+        {
+          "tool": "AssessDamage",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "aggregation": "grid_4x4"
+          }
+        },
+        {
+          "tool": "RankRegions",
+          "args": {
+            "question": "question_1",
+            "work": "damage_1",
+            "by": "normalized_damage_severity",
+            "candidates": "grid_4x4",
+            "top_k": 3
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the highest severity grid cells and scores."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "image_1",
+            "role": "post_disaster"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "damage_labels_1",
+            "role": "buildings"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "image": "scene_1",
+              "labels": "scene_2"
+            },
+            "mode": "xbd_grid",
+            "checks": {
+              "grid": "4x4"
+            }
+          }
+        },
+        {
+          "tool": "AssessDamage",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "aggregation": "grid_4x4"
+          }
+        },
+        {
+          "tool": "RankRegions",
+          "args": {
+            "question": "question_1",
+            "work": "damage_1",
+            "by": "normalized_damage_severity",
+            "candidates": "grid_4x4",
+            "top_k": 3
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the highest severity grid cells and scores."
+          }
+        }
+      ]
+    },
+    {
+      "source": "geodisaster",
+      "dataset": "xbd_damage_qa_valid_assets",
+      "question_type": "XBD-Q8",
+      "count_in_final_dataset": 177,
+      "question": "Create a comprehensive summary for this post-disaster flooding scene (hurricane-florence) from the declared building polygons, 2×2 quadrant table, and target mask. Include classified-only damage percentages, severe footprint area, spatial concentration (null winner and score when no severe buildings), and validation of mask codes 0–4; unclassified polygons are intentionally absent from the mask.",
+      "initial_artifact_handles": [
+        "damage_labels_1",
+        "image_1",
+        "mask_layers_1",
+        "question_1"
+      ],
+      "expected_answer": "comprehensive scene-level damage summary",
+      "eo_style_chain_length": 7,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "image_1",
+            "role": "post_disaster"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "damage_labels_1",
+            "role": "buildings"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "mask_layers_1",
+            "role": "target_classes"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "image": "scene_1",
+              "labels": "scene_2",
+              "masks": "scene_3"
+            },
+            "mode": "xbd_scene_summary"
+          }
+        },
+        {
+          "tool": "AssessDamage",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "aggregation": "scene"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "damage_1",
+            "metrics": {
+              "damage_summary": true,
+              "target_mask_distribution": true,
+              "severe_footprint_area": true
+            },
+            "region": "scene"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Create the comprehensive scene-level damage summary."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "image_1",
+            "role": "post_disaster"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "damage_labels_1",
+            "role": "buildings"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "mask_layers_1",
+            "role": "target_classes"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "image": "scene_1",
+              "labels": "scene_2",
+              "masks": "scene_3"
+            },
+            "mode": "xbd_scene_summary"
+          }
+        },
+        {
+          "tool": "AssessDamage",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "aggregation": "scene"
+          }
+        },
+        {
+          "tool": "ComputeStats",
+          "args": {
+            "question": "question_1",
+            "work": "damage_1",
+            "metrics": {
+              "damage_summary": true,
+              "target_mask_distribution": true,
+              "severe_footprint_area": true
+            },
+            "region": "scene"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Create the comprehensive scene-level damage summary."
+          }
+        }
+      ]
+    },
+    {
+      "source": "geodisaster",
+      "dataset": "xbd_damage_qa_valid_assets",
+      "question_type": "XBD-Q5",
+      "count_in_final_dataset": 121,
+      "question": "From the post-disaster fire scene (santa-rosa-wildfire), identify all buildings with severe damage (major-damage or destroyed). Report the total severe-building count, combined footprint area, and separate major/destroyed areas in square metres, computed from xy polygon coordinates and the scene GSD.",
+      "initial_artifact_handles": [
+        "damage_labels_1",
+        "image_1",
+        "question_1"
+      ],
+      "expected_answer": "severe building count and footprint",
+      "eo_style_chain_length": 6,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "image_1",
+            "role": "post_disaster"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "damage_labels_1",
+            "role": "buildings"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "image": "scene_1",
+              "labels": "scene_2"
+            },
+            "mode": "xbd_damage"
+          }
+        },
+        {
+          "tool": "ExtractObjects",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "target": "severe_buildings",
+            "filters": {
+              "severity": "major_or_destroyed"
+            }
+          }
+        },
+        {
+          "tool": "AssessDamage",
+          "args": {
+            "question": "question_1",
+            "work": "objects_1",
+            "aggregation": "severe_only",
+            "severity": "major_or_destroyed"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report severe building count and footprint statistics."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "image_1",
+            "role": "post_disaster"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "damage_labels_1",
+            "role": "buildings"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "image": "scene_1",
+              "labels": "scene_2"
+            },
+            "mode": "xbd_damage"
+          }
+        },
+        {
+          "tool": "ExtractObjects",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "target": "severe_buildings",
+            "filters": {
+              "severity": "major_or_destroyed"
+            }
+          }
+        },
+        {
+          "tool": "AssessDamage",
+          "args": {
+            "question": "question_1",
+            "work": "objects_1",
+            "aggregation": "severe_only",
+            "severity": "major_or_destroyed"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report severe building count and footprint statistics."
+          }
+        }
+      ]
+    },
+    {
+      "source": "geodisaster",
+      "dataset": "xbd_damage_qa_valid_assets",
+      "question_type": "XBD-Q7",
+      "count_in_final_dataset": 121,
+      "question": "Analyze severe building damage (major-damage or destroyed) across the 2x2 quadrant grid. Report per-quadrant severe counts, concentration as the largest quadrant count divided by total severe count, the classification, and every quadrant tied for the maximum. If total severe count is zero, report concentration null and no_severe_damage.",
+      "initial_artifact_handles": [
+        "damage_labels_1",
+        "image_1",
+        "question_1"
+      ],
+      "expected_answer": "quadrant concentration decision",
+      "eo_style_chain_length": 7,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "image_1",
+            "role": "post_disaster"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "damage_labels_1",
+            "role": "buildings"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "image": "scene_1",
+              "labels": "scene_2"
+            },
+            "mode": "xbd_quadrants",
+            "checks": {
+              "grid": "2x2"
+            }
+          }
+        },
+        {
+          "tool": "AssessDamage",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "aggregation": "quadrant_2x2",
+            "severity": "major_or_destroyed"
+          }
+        },
+        {
+          "tool": "RankRegions",
+          "args": {
+            "question": "question_1",
+            "work": "damage_1",
+            "by": "severe_damage_count",
+            "candidates": "quadrants_2x2",
+            "top_k": 4
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "rank_1",
+            "hazard": "building_damage",
+            "scale": "spatial_concentration"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Answer whether severe damage is concentrated and cite quadrant distribution."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "image_1",
+            "role": "post_disaster"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "damage_labels_1",
+            "role": "buildings"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "image": "scene_1",
+              "labels": "scene_2"
+            },
+            "mode": "xbd_quadrants",
+            "checks": {
+              "grid": "2x2"
+            }
+          }
+        },
+        {
+          "tool": "AssessDamage",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "aggregation": "quadrant_2x2",
+            "severity": "major_or_destroyed"
+          }
+        },
+        {
+          "tool": "RankRegions",
+          "args": {
+            "question": "question_1",
+            "work": "damage_1",
+            "by": "severe_damage_count",
+            "candidates": "quadrants_2x2",
+            "top_k": 4
+          }
+        },
+        {
+          "tool": "ScoreHazard",
+          "args": {
+            "question": "question_1",
+            "work": "rank_1",
+            "hazard": "building_damage",
+            "scale": "spatial_concentration"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Answer whether severe damage is concentrated and cite quadrant distribution."
+          }
+        }
+      ]
+    },
+    {
+      "source": "geodisaster",
+      "dataset": "xbd_damage_qa_valid_assets",
+      "question_type": "XBD-Q4",
+      "count_in_final_dataset": 55,
+      "question": "Compare these two xBD scenes for the same event. Compute severe-damage percentage as 100 times the major-damage-or-destroyed building count divided by the classified-building count; exclude unclassified buildings from that denominator. Also compare severe-damage footprint area. Report both scene summaries and the higher scene for each metric; report an exact tie rather than selecting a winner.",
+      "initial_artifact_handles": [
+        "damage_scene_1",
+        "damage_scene_2",
+        "question_1"
+      ],
+      "expected_answer": "which paired scene has greater structural damage",
+      "eo_style_chain_length": 6,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "damage_scene_1",
+            "role": "scene_a"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "damage_scene_2",
+            "role": "scene_b"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "scene_a": "scene_1",
+              "scene_b": "scene_2"
+            },
+            "mode": "scene_compare"
+          }
+        },
+        {
+          "tool": "AssessDamage",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "aggregation": "pair_compare",
+            "severity": "severe"
+          }
+        },
+        {
+          "tool": "CompareScenes",
+          "args": {
+            "question": "question_1",
+            "work": "damage_1",
+            "by": "severe_damage_ratio_and_footprint"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return which scene shows greater structural damage and why."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "damage_scene_1",
+            "role": "scene_a"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "damage_scene_2",
+            "role": "scene_b"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "scene_a": "scene_1",
+              "scene_b": "scene_2"
+            },
+            "mode": "scene_compare"
+          }
+        },
+        {
+          "tool": "AssessDamage",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "aggregation": "pair_compare",
+            "severity": "severe"
+          }
+        },
+        {
+          "tool": "CompareScenes",
+          "args": {
+            "question": "question_1",
+            "work": "damage_1",
+            "by": "severe_damage_ratio_and_footprint"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return which scene shows greater structural damage and why."
+          }
+        }
+      ]
+    },
+    {
+      "source": "ourdata/final_routing_subset_v1",
+      "dataset": "sav_flood_routing",
+      "question_type": "nearest_shelter",
+      "count_in_final_dataset": 200,
+      "question": "Validate the supplied flood-screened route candidates against the declared road-edge costs, then report the reachable shelter attached to the minimum fastest-objective candidate. Report shelter name, shelter confidence, route ID, distance, ETA, length-weighted risk score, composite objective cost, and blocked-edge count. This task validates and selects a packaged candidate; it does not run a new graph search.",
+      "initial_artifact_handles": [
+        "question_1",
+        "route_context_1",
+        "route_context_2"
+      ],
+      "expected_answer": "nearest reachable shelter and validated fastest-objective route facts",
+      "eo_style_chain_length": 5,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "route_context_1",
+            "role": "roads_shelters_flood"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "routing": "scene_1"
+            },
+            "mode": "flood_safe_routing"
+          }
+        },
+        {
+          "tool": "EstimateExposure",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "exposure": "blocked_roads",
+            "metrics": {
+              "flood_affected": true
+            }
+          }
+        },
+        {
+          "tool": "PlanRoutes",
+          "args": {
+            "question": "question_1",
+            "work": "exposure_1",
+            "objective": "nearest_reachable_shelter",
+            "avoid": {
+              "flood_affected_roads": true
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the supplied selected shelter and rank-one F1 candidate with blocked-road evidence."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "route_context_1",
+            "role": "roads_shelters_flood"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "routing": "scene_1"
+            },
+            "mode": "flood_safe_routing"
+          }
+        },
+        {
+          "tool": "EstimateExposure",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "exposure": "blocked_roads",
+            "metrics": {
+              "flood_affected": true
+            }
+          }
+        },
+        {
+          "tool": "PlanRoutes",
+          "args": {
+            "question": "question_1",
+            "work": "exposure_1",
+            "objective": "nearest_reachable_shelter",
+            "avoid": {
+              "flood_affected_roads": true
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the supplied selected shelter and rank-one F1 candidate with blocked-road evidence."
+          }
+        }
+      ]
+    },
+    {
+      "source": "ourdata/final_routing_subset_v1",
+      "dataset": "sav_flood_routing",
+      "question_type": "fastest_safest",
+      "count_in_final_dataset": 200,
+      "question": "Validate the supplied packaged route candidates against the declared road-edge costs. Report the minimum fastest, safest-weighted, and balanced composite-cost candidates and explain their travel-time and length-weighted flood-risk trade-off. The safest-weighted objective is not the same as minimizing mean risk alone. Do not run a new graph search or add an evacuation recommendation.",
+      "initial_artifact_handles": [
+        "question_1",
+        "route_context_1",
+        "route_context_2"
+      ],
+      "expected_answer": "fastest/safest-weighted/balanced composite-cost route comparison",
+      "eo_style_chain_length": 5,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "route_context_1",
+            "role": "roads_shelters_flood"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "routing": "scene_1"
+            },
+            "mode": "flood_safe_routing"
+          }
+        },
+        {
+          "tool": "PlanRoutes",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "objective": "candidate_routes",
+            "avoid": {
+              "flood_affected_roads": true
+            }
+          }
+        },
+        {
+          "tool": "CompareRoutes",
+          "args": {
+            "question": "question_1",
+            "work": "routes_1",
+            "prefer": {
+              "fastest": true,
+              "safest": true,
+              "balanced": true
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report packaged rank-one F1/S1/B1 candidates and their travel-time/flood-risk trade-off."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "route_context_1",
+            "role": "roads_shelters_flood"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "routing": "scene_1"
+            },
+            "mode": "flood_safe_routing"
+          }
+        },
+        {
+          "tool": "PlanRoutes",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "objective": "candidate_routes",
+            "avoid": {
+              "flood_affected_roads": true
+            }
+          }
+        },
+        {
+          "tool": "CompareRoutes",
+          "args": {
+            "question": "question_1",
+            "work": "routes_1",
+            "prefer": {
+              "fastest": true,
+              "safest": true,
+              "balanced": true
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report packaged rank-one F1/S1/B1 candidates and their travel-time/flood-risk trade-off."
+          }
+        }
+      ]
+    },
+    {
+      "source": "ourdata/final_routing_subset_v1",
+      "dataset": "sav_flood_routing",
+      "question_type": "visual_overlay",
+      "count_in_final_dataset": 200,
+      "question": "Validate and compare the supplied packaged route candidates, then render a fresh run-scoped overlay from the declared Sentinel-2 RGB GeoTIFF, OSM-derived roads, Copernicus flood extent, flood-risk and blocked-road attributes, origin, selected shelter, and all fastest/safest-weighted/balanced route labels. Bind the image to the current comparison handle and do not retrieve a prepared overlay.",
+      "initial_artifact_handles": [
+        "question_1",
+        "route_context_1",
+        "route_context_2"
+      ],
+      "expected_answer": "fresh rendered route overlay image and validation manifest",
+      "eo_style_chain_length": 6,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "route_context_2",
+            "role": "roads_shelters_flood_rgb"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "routing": "scene_1"
+            },
+            "mode": "flood_safe_routing"
+          }
+        },
+        {
+          "tool": "PlanRoutes",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "objective": "overlay_routes",
+            "avoid": {
+              "flood_affected_roads": true
+            }
+          }
+        },
+        {
+          "tool": "CompareRoutes",
+          "args": {
+            "question": "question_1",
+            "work": "routes_1",
+            "prefer": {
+              "fastest": true,
+              "safest": true,
+              "balanced": true
+            }
+          }
+        },
+        {
+          "tool": "RenderMap",
+          "args": {
+            "question": "question_1",
+            "work": "route_compare_1",
+            "layers": {
+              "rgb": true,
+              "roads": true,
+              "flood": true,
+              "blocked_roads": true,
+              "origin": true,
+              "shelter": true,
+              "routes": true,
+              "labels": true
+            },
+            "style": "route_overlay"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return <image> plus the schema-fixed validation receipt emitted by the current route_compare_1 render, then terminate."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "route_context_2",
+            "role": "roads_shelters_flood_rgb"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "routing": "scene_1"
+            },
+            "mode": "flood_safe_routing"
+          }
+        },
+        {
+          "tool": "PlanRoutes",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "objective": "overlay_routes",
+            "avoid": {
+              "flood_affected_roads": true
+            }
+          }
+        },
+        {
+          "tool": "CompareRoutes",
+          "args": {
+            "question": "question_1",
+            "work": "routes_1",
+            "prefer": {
+              "fastest": true,
+              "safest": true,
+              "balanced": true
+            }
+          }
+        },
+        {
+          "tool": "RenderMap",
+          "args": {
+            "question": "question_1",
+            "work": "route_compare_1",
+            "layers": {
+              "rgb": true,
+              "roads": true,
+              "flood": true,
+              "blocked_roads": true,
+              "origin": true,
+              "shelter": true,
+              "routes": true,
+              "labels": true
+            },
+            "style": "route_overlay"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return <image> plus the schema-fixed validation receipt emitted by the current route_compare_1 render, then terminate."
+          }
+        }
+      ]
+    },
+    {
+      "source": "ourdata/sen1_hand_final_hidden_eval_5q",
+      "dataset": "sen1floods11_hand_hidden_eval",
+      "question_type": "A",
+      "count_in_final_dataset": 100,
+      "question": "Using the Sentinel-1 SAR chip for Ghana_146222, generate a SAR-derived flood emergency inventory. Report predicted flood percentage, exact-grid predicted flood area, number of 8-neighbour connected flood regions, largest-region area and centroid, and the full 4x4 spatial grid.",
+      "initial_artifact_handles": [
+        "question_1",
+        "sar_chip_1",
+        "water_reference_1"
+      ],
+      "expected_answer": "flood emergency inventory",
+      "eo_style_chain_length": 6,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_chip_1",
+            "role": "primary"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "sar": "scene_1"
+            },
+            "mode": "sar_flood"
+          }
+        },
+        {
+          "tool": "MapFlood",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "method": "s1_min_backscatter_otsu_v1"
+          }
+        },
+        {
+          "tool": "ExtractObjects",
+          "args": {
+            "question": "question_1",
+            "work": "flood_1",
+            "target": "flood_components"
+          }
+        },
+        {
+          "tool": "DescribeFlood",
+          "args": {
+            "question": "question_1",
+            "work": "objects_1",
+            "metrics": {
+              "percentage": true,
+              "area": true,
+              "components": true,
+              "grid": "4x4"
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the predicted inventory and full 4x4 grid from the current generated mask."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_chip_1",
+            "role": "primary"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "sar": "scene_1"
+            },
+            "mode": "sar_flood"
+          }
+        },
+        {
+          "tool": "MapFlood",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "method": "s1_min_backscatter_otsu_v1"
+          }
+        },
+        {
+          "tool": "ExtractObjects",
+          "args": {
+            "question": "question_1",
+            "work": "flood_1",
+            "target": "flood_components"
+          }
+        },
+        {
+          "tool": "DescribeFlood",
+          "args": {
+            "question": "question_1",
+            "work": "objects_1",
+            "metrics": {
+              "percentage": true,
+              "area": true,
+              "components": true,
+              "grid": "4x4"
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the predicted inventory and full 4x4 grid from the current generated mask."
+          }
+        }
+      ]
+    },
+    {
+      "source": "ourdata/sen1_hand_final_hidden_eval_5q",
+      "dataset": "sen1floods11_hand_hidden_eval",
+      "question_type": "B",
+      "count_in_final_dataset": 100,
+      "question": "Using SAR-derived flood extraction for chip Ghana_146222, create a run-scoped flood-polygon GeoJSON. Report whether geometry was generated, polygon count, total predicted flood area, largest polygon area, bounding box and centroid, and the top 3 flooded 4x4 cells.",
+      "initial_artifact_handles": [
+        "question_1",
+        "sar_chip_1",
+        "water_reference_1"
+      ],
+      "expected_answer": "flood polygon geometry report",
+      "eo_style_chain_length": 7,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_chip_1",
+            "role": "primary"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "sar": "scene_1"
+            },
+            "mode": "sar_flood"
+          }
+        },
+        {
+          "tool": "MapFlood",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "method": "s1_min_backscatter_otsu_v1"
+          }
+        },
+        {
+          "tool": "ExtractObjects",
+          "args": {
+            "question": "question_1",
+            "work": "flood_1",
+            "target": "flood_polygons"
+          }
+        },
+        {
+          "tool": "DescribeFlood",
+          "args": {
+            "question": "question_1",
+            "work": "objects_1",
+            "metrics": {
+              "polygon_count": true,
+              "total_area": true,
+              "largest_polygon": true,
+              "grid": "4x4"
+            }
+          }
+        },
+        {
+          "tool": "RankRegions",
+          "args": {
+            "question": "question_1",
+            "work": "flood_report_1",
+            "by": "flood_percentage",
+            "candidates": "grid_4x4",
+            "top_k": 3
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the generated polygon artifact, polygon summary, and top-three grid cells."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_chip_1",
+            "role": "primary"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "sar": "scene_1"
+            },
+            "mode": "sar_flood"
+          }
+        },
+        {
+          "tool": "MapFlood",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "method": "s1_min_backscatter_otsu_v1"
+          }
+        },
+        {
+          "tool": "ExtractObjects",
+          "args": {
+            "question": "question_1",
+            "work": "flood_1",
+            "target": "flood_polygons"
+          }
+        },
+        {
+          "tool": "DescribeFlood",
+          "args": {
+            "question": "question_1",
+            "work": "objects_1",
+            "metrics": {
+              "polygon_count": true,
+              "total_area": true,
+              "largest_polygon": true,
+              "grid": "4x4"
+            }
+          }
+        },
+        {
+          "tool": "RankRegions",
+          "args": {
+            "question": "question_1",
+            "work": "flood_report_1",
+            "by": "flood_percentage",
+            "candidates": "grid_4x4",
+            "top_k": 3
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the generated polygon artifact, polygon summary, and top-three grid cells."
+          }
+        }
+      ]
+    },
+    {
+      "source": "ourdata/sen1_hand_final_hidden_eval_5q",
+      "dataset": "sen1floods11_hand_hidden_eval",
+      "question_type": "C",
+      "count_in_final_dataset": 100,
+      "question": "For chip Ghana_146222, estimate flood extent from the SAR image and analyze spatial concentration on a 4x4 grid. Report the top 3 cells by predicted flood percentage, the maximum-cell share of total predicted flood, and whether the result is localized or dispersed under the declared 0.5 threshold.",
+      "initial_artifact_handles": [
+        "question_1",
+        "sar_chip_1",
+        "water_reference_1"
+      ],
+      "expected_answer": "top 3 grid cells and flood extent",
+      "eo_style_chain_length": 6,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_chip_1",
+            "role": "primary"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "sar": "scene_1"
+            },
+            "mode": "sar_flood",
+            "checks": {
+              "grid": "4x4"
+            }
+          }
+        },
+        {
+          "tool": "MapFlood",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "method": "s1_min_backscatter_otsu_v1"
+          }
+        },
+        {
+          "tool": "DescribeFlood",
+          "args": {
+            "question": "question_1",
+            "work": "flood_1",
+            "metrics": {
+              "grid": "4x4",
+              "concentration": true,
+              "spatial_pattern": true
+            }
+          }
+        },
+        {
+          "tool": "RankRegions",
+          "args": {
+            "question": "question_1",
+            "work": "flood_report_1",
+            "by": "flood_percentage",
+            "candidates": "grid_4x4",
+            "top_k": 3
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the top-three cells, concentration score, and declared spatial pattern."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_chip_1",
+            "role": "primary"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "sar": "scene_1"
+            },
+            "mode": "sar_flood",
+            "checks": {
+              "grid": "4x4"
+            }
+          }
+        },
+        {
+          "tool": "MapFlood",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "method": "s1_min_backscatter_otsu_v1"
+          }
+        },
+        {
+          "tool": "DescribeFlood",
+          "args": {
+            "question": "question_1",
+            "work": "flood_1",
+            "metrics": {
+              "grid": "4x4",
+              "concentration": true,
+              "spatial_pattern": true
+            }
+          }
+        },
+        {
+          "tool": "RankRegions",
+          "args": {
+            "question": "question_1",
+            "work": "flood_report_1",
+            "by": "flood_percentage",
+            "candidates": "grid_4x4",
+            "top_k": 3
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report the top-three cells, concentration score, and declared spatial pattern."
+          }
+        }
+      ]
+    },
+    {
+      "source": "ourdata/sen1_hand_final_hidden_eval_5q",
+      "dataset": "sen1floods11_hand_hidden_eval",
+      "question_type": "D",
+      "count_in_final_dataset": 100,
+      "question": "Using the SAR chip and required JRC known-water reference for Ghana_146222, separate predicted flood overlapping known water from predicted flood outside that reference. Report total predicted flood percentage and area, overlap and outside-reference counts and percentages, and the largest connected-region area and centroid. Do not call outside-reference pixels new flood.",
+      "initial_artifact_handles": [
+        "question_1",
+        "sar_chip_1",
+        "water_reference_1"
+      ],
+      "expected_answer": "known-water overlap versus outside-reference predicted flood",
+      "eo_style_chain_length": 7,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_chip_1",
+            "role": "primary"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "water_reference_1",
+            "role": "known_water_reference"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "sar": "scene_1",
+              "water": "scene_2"
+            },
+            "mode": "sar_flood_reference",
+            "checks": {}
+          }
+        },
+        {
+          "tool": "MapFlood",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "method": "s1_min_backscatter_otsu_v1"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "flood_1",
+            "compare": {
+              "reference": "known_water",
+              "criterion": "overlap_vs_outside_reference"
+            }
+          }
+        },
+        {
+          "tool": "DescribeFlood",
+          "args": {
+            "question": "question_1",
+            "work": "compare_1",
+            "metrics": {
+              "percentage": true,
+              "area": true,
+              "components": true,
+              "known_water_overlap": true,
+              "outside_reference": true
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report predicted flood overlapping and outside the known-water reference plus the largest connected region."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_chip_1",
+            "role": "primary"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "water_reference_1",
+            "role": "known_water_reference"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "sar": "scene_1",
+              "water": "scene_2"
+            },
+            "mode": "sar_flood_reference",
+            "checks": {}
+          }
+        },
+        {
+          "tool": "MapFlood",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "method": "s1_min_backscatter_otsu_v1"
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "flood_1",
+            "compare": {
+              "reference": "known_water",
+              "criterion": "overlap_vs_outside_reference"
+            }
+          }
+        },
+        {
+          "tool": "DescribeFlood",
+          "args": {
+            "question": "question_1",
+            "work": "compare_1",
+            "metrics": {
+              "percentage": true,
+              "area": true,
+              "components": true,
+              "known_water_overlap": true,
+              "outside_reference": true
+            }
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Report predicted flood overlapping and outside the known-water reference plus the largest connected region."
+          }
+        }
+      ]
+    },
+    {
+      "source": "ourdata/sen1_hand_final_hidden_eval_5q",
+      "dataset": "sen1floods11_hand_hidden_eval",
+      "question_type": "E",
+      "count_in_final_dataset": 100,
+      "question": "Generate a complete SAR flood diagnostic for chip Ghana_146222. Create a prediction-mask artifact, 8-neighbour polygon GeoJSON, exact-grid area and component summary, largest-component geometry, full 4x4 grid and top-three ranking, JRC known-water overlap, and a fresh SAR/flood/component/grid visualization. Return the declared structured summary.",
+      "initial_artifact_handles": [
+        "question_1",
+        "sar_chip_1",
+        "water_reference_1"
+      ],
+      "expected_answer": "complete SAR flood diagnostic report",
+      "eo_style_chain_length": 10,
+      "eo_style_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_chip_1",
+            "role": "primary"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "water_reference_1",
+            "role": "known_water_reference"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "sar": "scene_1",
+              "water": "scene_2"
+            },
+            "mode": "sar_flood_diagnostic",
+            "checks": {
+              "grid": "4x4"
+            }
+          }
+        },
+        {
+          "tool": "MapFlood",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "method": "s1_min_backscatter_otsu_v1"
+          }
+        },
+        {
+          "tool": "ExtractObjects",
+          "args": {
+            "question": "question_1",
+            "work": "flood_1",
+            "target": "flood_polygons"
+          }
+        },
+        {
+          "tool": "DescribeFlood",
+          "args": {
+            "question": "question_1",
+            "work": "objects_1",
+            "metrics": {
+              "percentage": true,
+              "area": true,
+              "components": true,
+              "polygons": true,
+              "grid": "4x4"
+            }
+          }
+        },
+        {
+          "tool": "RankRegions",
+          "args": {
+            "question": "question_1",
+            "work": "flood_report_1",
+            "by": "flood_percentage",
+            "candidates": "grid_4x4",
+            "top_k": 3
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "rank_1",
+            "compare": {
+              "reference": "known_water",
+              "criterion": "diagnostic_overlap"
+            }
+          }
+        },
+        {
+          "tool": "RenderMap",
+          "args": {
+            "question": "question_1",
+            "work": "compare_1",
+            "layers": {
+              "sar": true,
+              "flood_mask": true,
+              "components": true,
+              "grid": true
+            },
+            "style": "flood_diagnostic"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the complete computed diagnostic and confirm the three generated artifacts."
+          }
+        }
+      ],
+      "agent_friendly_chain": [
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "sar_chip_1",
+            "role": "primary"
+          }
+        },
+        {
+          "tool": "ReadData",
+          "args": {
+            "question": "question_1",
+            "input": "water_reference_1",
+            "role": "known_water_reference"
+          }
+        },
+        {
+          "tool": "PrepareScene",
+          "args": {
+            "question": "question_1",
+            "inputs": {
+              "sar": "scene_1",
+              "water": "scene_2"
+            },
+            "mode": "sar_flood_diagnostic",
+            "checks": {
+              "grid": "4x4"
+            }
+          }
+        },
+        {
+          "tool": "MapFlood",
+          "args": {
+            "question": "question_1",
+            "work": "work_1",
+            "method": "s1_min_backscatter_otsu_v1"
+          }
+        },
+        {
+          "tool": "ExtractObjects",
+          "args": {
+            "question": "question_1",
+            "work": "flood_1",
+            "target": "flood_polygons"
+          }
+        },
+        {
+          "tool": "DescribeFlood",
+          "args": {
+            "question": "question_1",
+            "work": "objects_1",
+            "metrics": {
+              "percentage": true,
+              "area": true,
+              "components": true,
+              "polygons": true,
+              "grid": "4x4"
+            }
+          }
+        },
+        {
+          "tool": "RankRegions",
+          "args": {
+            "question": "question_1",
+            "work": "flood_report_1",
+            "by": "flood_percentage",
+            "candidates": "grid_4x4",
+            "top_k": 3
+          }
+        },
+        {
+          "tool": "CompareSources",
+          "args": {
+            "question": "question_1",
+            "work": "rank_1",
+            "compare": {
+              "reference": "known_water",
+              "criterion": "diagnostic_overlap"
+            }
+          }
+        },
+        {
+          "tool": "RenderMap",
+          "args": {
+            "question": "question_1",
+            "work": "compare_1",
+            "layers": {
+              "sar": true,
+              "flood_mask": true,
+              "components": true,
+              "grid": true
+            },
+            "style": "flood_diagnostic"
+          }
+        },
+        {
+          "tool": "TaskComplete",
+          "args": {
+            "status": "TASK_COMPLETE",
+            "summary": "Return the complete computed diagnostic and confirm the three generated artifacts."
+          }
+        }
+      ]
+    }
+  ]
+}

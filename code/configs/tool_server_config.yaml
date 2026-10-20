@@ -1,0 +1,164 @@
+base_dir: ./tool_server/tool_workers
+log_folder: ./runs/tool_server_logs
+tools_output_dir: ./runs/tool_outputs
+default_calculate_gpus: 0
+default_calculate_cpus: 4
+default_control_cpus: 2
+default_control_gpus: 0
+retry_interval: 1
+request_timeout: 10
+controller_ready_attempts: 120
+controller_config:
+  worker_name: final_dataset_controller
+  job_name: final_dataset_controller
+  calculate_type: control
+  cmd:
+    script-addr: ./online_workers/controller.py
+    port: 20101
+    host: 0.0.0.0
+model_worker_config: []
+tool_worker_config:
+- ReadData:
+    worker_name: ReadData
+    job_name: final_ReadData
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/ReadData_worker.py
+      port: 20102
+      host: 0.0.0.0
+- PrepareScene:
+    worker_name: PrepareScene
+    job_name: final_PrepareScene
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/PrepareScene_worker.py
+      port: 20103
+      host: 0.0.0.0
+- ComputeStats:
+    worker_name: ComputeStats
+    job_name: final_ComputeStats
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/ComputeStats_worker.py
+      port: 20104
+      host: 0.0.0.0
+- MeasureArea:
+    worker_name: MeasureArea
+    job_name: final_MeasureArea
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/MeasureArea_worker.py
+      port: 20105
+      host: 0.0.0.0
+- CompareSources:
+    worker_name: CompareSources
+    job_name: final_CompareSources
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/CompareSources_worker.py
+      port: 20106
+      host: 0.0.0.0
+- DetectChange:
+    worker_name: DetectChange
+    job_name: final_DetectChange
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/DetectChange_worker.py
+      port: 20107
+      host: 0.0.0.0
+- ClassifyChange:
+    worker_name: ClassifyChange
+    job_name: final_ClassifyChange
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/ClassifyChange_worker.py
+      port: 20108
+      host: 0.0.0.0
+- ScoreHazard:
+    worker_name: ScoreHazard
+    job_name: final_ScoreHazard
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/ScoreHazard_worker.py
+      port: 20109
+      host: 0.0.0.0
+- EstimateExposure:
+    worker_name: EstimateExposure
+    job_name: final_EstimateExposure
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/EstimateExposure_worker.py
+      port: 20110
+      host: 0.0.0.0
+- AssessDamage:
+    worker_name: AssessDamage
+    job_name: final_AssessDamage
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/AssessDamage_worker.py
+      port: 20111
+      host: 0.0.0.0
+- RankRegions:
+    worker_name: RankRegions
+    job_name: final_RankRegions
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/RankRegions_worker.py
+      port: 20112
+      host: 0.0.0.0
+- CompareScenes:
+    worker_name: CompareScenes
+    job_name: final_CompareScenes
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/CompareScenes_worker.py
+      port: 20113
+      host: 0.0.0.0
+- ExtractObjects:
+    worker_name: ExtractObjects
+    job_name: final_ExtractObjects
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/ExtractObjects_worker.py
+      port: 20114
+      host: 0.0.0.0
+- MapFlood:
+    worker_name: MapFlood
+    job_name: final_MapFlood
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/MapFlood_worker.py
+      port: 20115
+      host: 0.0.0.0
+- DescribeFlood:
+    worker_name: DescribeFlood
+    job_name: final_DescribeFlood
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/DescribeFlood_worker.py
+      port: 20116
+      host: 0.0.0.0
+- PlanRoutes:
+    worker_name: PlanRoutes
+    job_name: final_PlanRoutes
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/PlanRoutes_worker.py
+      port: 20117
+      host: 0.0.0.0
+- CompareRoutes:
+    worker_name: CompareRoutes
+    job_name: final_CompareRoutes
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/CompareRoutes_worker.py
+      port: 20118
+      host: 0.0.0.0
+- RenderMap:
+    worker_name: RenderMap
+    job_name: final_RenderMap
+    calculate_type: control
+    cmd:
+      script-addr: ./online_workers/RenderMap_worker.py
+      port: 20119
+      host: 0.0.0.0
