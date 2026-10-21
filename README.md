@@ -15,14 +15,14 @@
 </p>
 
 <p align="center">
-Maram Hasan,
-Aman Verma,
-Savitra Roy,
-Hariseetharam Gunduboina,
-Daksh Jain,<br>
-Muhammad Haris Khan,
-Subhasis Chaudhuri,
-Biplab Banerjee
+<a href="https://github.com/VIMAGE-IITB/GeoDisaster">Maram Hasan</a>,
+<a href="https://github.com/VIMAGE-IITB/GeoDisaster">Aman Verma</a>,
+<a href="https://github.com/VIMAGE-IITB/GeoDisaster">Savitra Roy</a>,
+<a href="https://github.com/VIMAGE-IITB/GeoDisaster">Hariseetharam Gunduboina</a>,
+<a href="https://github.com/VIMAGE-IITB/GeoDisaster">Daksh Jain</a>,<br>
+<a href="https://github.com/VIMAGE-IITB/GeoDisaster">Muhammad Haris Khan</a>,
+<a href="https://github.com/VIMAGE-IITB/GeoDisaster">Subhasis Chaudhuri</a>,
+<a href="https://github.com/VIMAGE-IITB/GeoDisaster">Biplab Banerjee</a>
 </p>
 
 <p align="center">
@@ -57,6 +57,9 @@ The project introduces:
 - Heterogeneous EO/GIS evidence, including optical imagery, SAR imagery, raster masks, vector geometries, road networks, exposure layers, and structured artifacts.
 - A **contract-driven orchestrated multi-agent framework** with **18 disaster-oriented geospatial tools**.
 - **Role-Contract Expectation Alignment (RCEA)**, combining contract-aligned supervised fine-tuning with contract-grounded reinforcement learning over dense step-level signals.
+
+https://github.com/user-attachments/assets/GeoDisaster-Promo.mp4
+
 
 **GeoDisaster** evaluates whether agents can transform heterogeneous EO/GIS inputs into grounded operational disaster decisions through valid multi-step reasoning, structured intermediate state tracking, and evidence-backed final responses.
 
