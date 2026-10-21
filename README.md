@@ -210,9 +210,9 @@ GeoDisaster/
 
 ```bibtex
 @article{hasan2026geodisaster,
-  title   = {GeoDisaster: Benchmarking Orchestrated Agents for Operational Disaster Geo-Intelligence},
-  author  = {Hasan, Maram and Verma, Aman and Roy, Savitra and Gunduboina, Hariseetharam and Jain, Daksh and Khan, Muhammad Haris and Chaudhuri, Subhasis and Banerjee, Biplab},
-  journal = {Preprint},
-  year    = {2026}
+  title={GeoDisaster: Benchmarking Orchestrated Agents for Operational Disaster Geo-Intelligence},
+  author={Hasan, Maram and Verma, Aman and Roy, Savitra and Gunduboina, Hariseetharam and Jain, Daksh and Khan, Muhammad Haris and Chaudhuri, Subhasis and Banerjee, Biplab},
+  journal={arXiv preprint arXiv:2606.17246},
+  year={2026}
 }
 ```
