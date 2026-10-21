@@ -41,9 +41,9 @@ Mohamed bin Zayed University of Artificial Intelligence
 ---
 
 ## 🧩 News
-
-- GeoDisaster benchmark, code, and documentation are prepared under the official project repository.
-- The Hugging Face dataset release contains the complete 2,921-instance benchmark, single-agent and multi-agent trajectories, training splits, bundled redistributable source assets, and a pinned installer for the selected Sen1Floods11 inputs.
+- [x] GeoDisaster accepted at BMVC 2026 🎉
+- [x] GeoDisaster benchmark, code, and documentation are prepared under the official project repository.
+- [x] The Hugging Face dataset release contains the complete 2,921-instance benchmark, single-agent and multi-agent trajectories, training splits, bundled redistributable source assets, and a pinned installer for the selected Sen1Floods11 inputs.
 
 ---
 
