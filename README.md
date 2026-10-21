@@ -33,7 +33,7 @@ Mohamed bin Zayed University of Artificial Intelligence
 </p>
 
 <p align="center">
-<a href="https://huggingface.co/datasets/vimageiitb/geodisaster-agentic-2921"><img src="https://img.shields.io/badge/Dataset-HuggingFace-yellow"></a>
+<a href="https://huggingface.co/datasets/vimageiitb/GeoDisaster"><img src="https://img.shields.io/badge/Dataset-HuggingFace-yellow"></a>
 <a href="code/README.md"><img src="https://img.shields.io/badge/Code-Available-red"></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue"></a>
 </p>
