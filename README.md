@@ -146,7 +146,7 @@ The framework contains four role-specialized agents:
 
 Agents collaborate through explicit execution contracts rather than free-form delegation. Each plan step names its specialist, evidence dependencies, and subgoal; tool calls follow generated argument schemas and role ownership; the runtime projects successful worker evidence into the question's declared JSON Schema and publishes a stable reference for model termination. This makes intermediate execution verifiable and enables dense step-level evaluation.
 
-See [`code/README.md`](code/README.md) for implementation details.
+See [`Demo.md`](Demo.md) for runtime demo.
 
 ---
 ## 🤖 Multi-Agent Alignment
