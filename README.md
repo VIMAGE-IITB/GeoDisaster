@@ -58,7 +58,9 @@ The project introduces:
 - A **contract-driven orchestrated multi-agent framework** with **18 disaster-oriented geospatial tools**.
 - **Role-Contract Expectation Alignment (RCEA)**, combining contract-aligned supervised fine-tuning with contract-grounded reinforcement learning over dense step-level signals.
 
-[https://github.com/user-attachments/assets/GeoDisaster-Promo.mp4](https://github.com/VIMAGE-IITB/GeoDisaster/blob/main/assets/GeoDisaster-Promo.mp4)
+  
+https://github.com/user-attachments/assets/a3df2cb5-809f-4a13-8078-a893e3e50b43
+
 
 
 **GeoDisaster** evaluates whether agents can transform heterogeneous EO/GIS inputs into grounded operational disaster decisions through valid multi-step reasoning, structured intermediate state tracking, and evidence-backed final responses.
